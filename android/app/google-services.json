@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "26245893659",
+    "project_id": "cabougeou-d33a9",
+    "storage_bucket": "cabougeou-d33a9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26245893659:android:779ee767311c91aa39f2be",
+        "android_client_info": {
+          "package_name": "com.example.mydefenseoff"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPv7ecpc6fwJII-NUiqCWuk-CXG-PoGZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

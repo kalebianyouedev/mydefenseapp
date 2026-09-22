@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Photo de profil et bannière : lisibles par tous (affichage public),
+    // modifiables uniquement par leur propriétaire.
+    match /users/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Médias du fil "Posts" (photo/vidéo) : lisibles par tous, envoyés
+    // uniquement par leur auteur.
+    match /posts/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
