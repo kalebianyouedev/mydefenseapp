@@ -54,6 +54,20 @@ class EventService {
         .handleError((_) => <Event>[]);
   }
 
+  /// Tous les événements créés par l'utilisateur courant, toutes ses
+  /// organisations confondues. Utilisé par "Mes publications".
+  Stream<List<Event>> watchMine() {
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
+    return _events
+        .where('ownerId', isEqualTo: uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((d) => Event.fromMap(d.id, d.data())).toList())
+        .handleError((_) => <Event>[]);
+  }
+
   Stream<Event?> watchOne(String eventId) {
     return _events
         .doc(eventId)

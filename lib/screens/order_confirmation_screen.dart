@@ -210,24 +210,206 @@ class _TicketCard extends StatelessWidget {
 
   const _TicketCard({required this.ticket});
 
+  static const _statusLabels = {
+    TicketStatus.valid: 'Valide',
+    TicketStatus.used: 'Utilisé',
+    TicketStatus.cancelled: 'Annulé',
+  };
+  static const _statusColors = {
+    TicketStatus.valid: Color(0xFF1E9E6B),
+    TicketStatus.used: authMuted,
+    TicketStatus.cancelled: authPrimary,
+  };
+
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat.decimalPattern('fr_FR');
+    final dateFmt = DateFormat("EEE d MMM y • HH'h'mm", 'fr_FR');
+    final statusColor = _statusColors[ticket.status]!;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(border: Border.all(color: authBorder), borderRadius: BorderRadius.circular(20)),
-      child: Column(
-        children: [
-          Text(ticket.ticketTypeName, style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w700, color: authInk)),
-          if (ticket.seanceName != null) ...[
-            const SizedBox(height: 3),
-            Text(ticket.seanceName!, style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
-          ],
-          const SizedBox(height: 16),
-          QrImageView(data: ticket.code, size: 140, backgroundColor: Colors.white),
-          const SizedBox(height: 12),
-          Text(ticket.code, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 2, color: authInk)),
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
+          ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Photo de couverture + titre + badge de statut.
+            SizedBox(
+              height: 150,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ticket.eventCoverImageUrl != null
+                      ? Image.network(
+                          ticket.eventCoverImageUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) =>
+                              progress == null ? child : _coverFallback(),
+                          errorBuilder: (_, _, _) => _coverFallback(),
+                        )
+                      : _coverFallback(),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.05),
+                          Colors.black.withOpacity(0.70),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 14,
+                    top: 14,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _statusLabels[ticket.status]!,
+                        style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 18,
+                    right: 18,
+                    bottom: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ticket.eventTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          ticket.ticketTypeName,
+                          style: GoogleFonts.poppins(fontSize: 12.5, color: Colors.white70, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Détails (date, lieu, prix).
+            Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
+              child: Column(
+                children: [
+                  if (ticket.seanceStart != null)
+                    _infoRow(Icons.calendar_today_outlined, dateFmt.format(ticket.seanceStart!)),
+                  if (ticket.venue.isNotEmpty || ticket.city.isNotEmpty)
+                    _infoRow(Icons.place_outlined,
+                        [ticket.venue, ticket.city].where((e) => e.isNotEmpty).join(', ')),
+                  _infoRow(Icons.payments_outlined, '${fmt.format(ticket.price)} XAF'),
+                ],
+              ),
+            ),
+            Container(color: Colors.white, child: _DashedDivider()),
+            // QR code.
+            Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: authBorder),
+                    ),
+                    child: QrImageView(data: ticket.code, size: 150, backgroundColor: Colors.white),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    ticket.code,
+                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 3, color: authInk),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Présentez ce QR code à l\'entrée',
+                    style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _coverFallback() {
+    return Container(
+      decoration: const BoxDecoration(color: authInk),
+      child: const Center(child: Icon(Icons.festival_outlined, size: 36, color: Colors.white70)),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: authMuted),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.poppins(fontSize: 13, color: authInk, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ligne pointillée façon "détachez ici", entre les infos et le QR code.
+class _DashedDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const dashWidth = 6.0;
+          const dashSpace = 5.0;
+          final count = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
+          return Row(
+            children: List.generate(
+              count,
+              (_) => Padding(
+                padding: const EdgeInsets.only(right: dashSpace),
+                child: Container(width: dashWidth, height: 1.4, color: authBorder),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

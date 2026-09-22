@@ -10,6 +10,8 @@ import 'create_organisation_screen.dart';
 import 'events_list_screen.dart';
 import 'organisations_screen.dart';
 import 'placeholder_screen.dart';
+import 'votes_screen.dart';
+import 'wallet_screen.dart';
 
 /// Petit tableau de bord d'une organisation : logo/nom/description de
 /// l'organisation sélectionnée puis un menu rapide vers Événements,
@@ -166,11 +168,10 @@ class _OrganisationHubScreenState extends State<OrganisationHubScreen> {
                       _HubTile(
                         icon: Icons.how_to_vote_outlined,
                         label: 'Votes',
-                        onTap: () => _openPlaceholder(
-                          context,
-                          title: 'Votes',
-                          icon: Icons.how_to_vote_outlined,
-                          organisation: selected,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => VotesScreen(organisation: selected),
+                          ),
                         ),
                       ),
                       _HubTile(
@@ -196,11 +197,10 @@ class _OrganisationHubScreenState extends State<OrganisationHubScreen> {
                       _HubTile(
                         icon: Icons.account_balance_wallet_outlined,
                         label: 'Portefeuille',
-                        onTap: () => _openPlaceholder(
-                          context,
-                          title: 'Portefeuille',
-                          icon: Icons.account_balance_wallet_outlined,
-                          organisation: selected,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => WalletScreen(organisation: selected),
+                          ),
                         ),
                       ),
                       _HubTile(

@@ -1,18 +1,14 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/post.dart';
 import '../models/post_comment.dart';
 import 'auth_service.dart';
 import 'profile_service.dart';
-import 'stockimg_client.dart';
 
-/// Fil "Posts" (photo/vidéo façon reels) : publications, likes,
-/// sauvegardes, commentaires, abonnements et republications, le tout
-/// dans Firestore. Les images passent par StockImg ; les vidéos, que
-/// StockImg ne gère pas, restent sur Firebase Storage.
+/// Fil "Posts" (photo façon reels) : likes, sauvegardes, commentaires,
+/// abonnements et republications sur les publications existantes, le
+/// tout dans Firestore. La création de nouvelles publications a été
+/// retirée de l'app.
 class PostService {
   PostService._();
   static final PostService instance = PostService._();
@@ -20,7 +16,6 @@ class PostService {
   static const _timeout = Duration(seconds: 15);
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   CollectionReference<Map<String, dynamic>> get _posts =>
       _db.collection('posts');
@@ -42,56 +37,8 @@ class PostService {
   }
 
   // ---------------------------------------------------------------------
-  // Création
+  // Republication
   // ---------------------------------------------------------------------
-
-  /// Upload le média puis crée la publication. Renvoie l'id créé.
-  Future<String> createPost({
-    required File mediaFile,
-    required PostMediaType mediaType,
-    required String caption,
-    String? organisationId,
-    String? organisationName,
-  }) async {
-    final uid = _uid;
-    if (uid == null) throw StateError('Utilisateur non connecté.');
-
-    final profile = await ProfileService.instance.fetchProfile(uid);
-    final user = AuthService.instance.currentUser;
-    final authorName = profile?.fullName.isNotEmpty == true
-        ? profile!.fullName
-        : (user?.displayName?.isNotEmpty == true
-            ? user!.displayName!
-            : (user?.email ?? 'Utilisateur'));
-
-    final String mediaUrl;
-    if (mediaType == PostMediaType.video) {
-      final ref = _storage
-          .ref()
-          .child('posts')
-          .child(uid)
-          .child('${DateTime.now().millisecondsSinceEpoch}.mp4');
-      await ref.putFile(mediaFile).timeout(const Duration(seconds: 90));
-      mediaUrl = await ref.getDownloadURL().timeout(_timeout);
-    } else {
-      mediaUrl = await StockImgClient.instance.uploadFile(mediaFile);
-    }
-
-    final post = Post(
-      id: '',
-      authorId: uid,
-      authorName: authorName,
-      authorPhotoUrl: profile?.photoUrl,
-      mediaUrl: mediaUrl,
-      mediaType: mediaType,
-      caption: caption.trim(),
-      organisationId: organisationId,
-      organisationName: organisationName,
-    );
-
-    final doc = await _posts.add(post.toMap()).timeout(_timeout);
-    return doc.id;
-  }
 
   /// Republie une publication existante sur le fil de l'utilisateur
   /// courant.

@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../welcome_screen.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted;
+import 'my_publications_screen.dart';
 import 'organisation_hub_screen.dart';
 import 'placeholder_screen.dart';
 import 'profile_screen.dart';
@@ -35,6 +36,12 @@ class AccountScreen extends StatelessWidget {
   void _openOrganisationHub(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const OrganisationHubScreen()),
+    );
+  }
+
+  void _openMyPublications(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const MyPublicationsScreen()),
     );
   }
 
@@ -120,6 +127,11 @@ class AccountScreen extends StatelessWidget {
               icon: Icons.dashboard_customize_outlined,
               label: 'Tableau de bord',
               onTap: () => _openOrganisationHub(context),
+            ),
+            _AccountRow(
+              icon: Icons.grid_view_outlined,
+              label: 'Mes publications',
+              onTap: () => _openMyPublications(context),
             ),
             const SizedBox(height: 12),
             const Divider(color: Color(0xFFEDEDF1), height: 1),

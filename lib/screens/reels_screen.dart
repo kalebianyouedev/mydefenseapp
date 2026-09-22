@@ -10,7 +10,6 @@ import '../services/profile_service.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, showAuthSnack;
 import '../widgets/video_post_player.dart';
 import 'comments_sheet.dart';
-import 'organisations_screen.dart';
 
 /// Fil "Posts" façon reels : défilement vertical plein écran de
 /// publications (photo ou vidéo) avec like, commentaires, sauvegarde,
@@ -31,8 +30,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
     _pageController.dispose();
     super.dispose();
   }
-
-  Future<void> _openCreatePost() => openPostFlow(context);
 
   @override
   Widget build(BuildContext context) {
@@ -65,24 +62,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                     style: GoogleFonts.poppins(
                         fontSize: 14, color: Colors.white),
                   ),
-                  const SizedBox(height: 18),
-                  ElevatedButton.icon(
-                    onPressed: _openCreatePost,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: authPrimary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(Icons.add),
-                    label: Text('Publier',
-                        style: GoogleFonts.poppins(
-                            fontSize: 14, fontWeight: FontWeight.w600)),
-                  ),
                 ],
               ),
             );
@@ -100,43 +79,9 @@ class _ReelsScreenState extends State<ReelsScreen> {
                   isActive: index == _activeIndex,
                 ),
               ),
-              Positioned(
-                top: 8,
-                right: 12,
-                child: SafeArea(
-                  bottom: false,
-                  child: _RoundIconButton(
-                    icon: Icons.add,
-                    onTap: _openCreatePost,
-                  ),
-                ),
-              ),
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _RoundIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _RoundIconButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.35),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }

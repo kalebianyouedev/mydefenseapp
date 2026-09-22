@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -25,88 +27,117 @@ class TicketPdfService {
     final doc = pw.Document();
     final dateFormat = DateFormat("EEEE d MMMM y 'à' HH'h'mm", 'fr_FR');
 
+    final logoBytes = await rootBundle.load('assets/images/logo.png');
+    final logo = pw.MemoryImage(logoBytes.buffer.asUint8List());
+    final coverImage = await _fetchImage(order.eventCoverImageUrl);
+
     for (final ticket in tickets) {
       doc.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a5,
-          margin: const pw.EdgeInsets.all(28),
+          margin: pw.EdgeInsets.zero,
           build: (context) {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      'BILLET',
-                      style: pw.TextStyle(
-                        fontSize: 12,
-                        fontWeight: pw.FontWeight.bold,
-                        color: _pdfPrimary,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    pw.Text(
-                      ticket.status.name == 'valid' ? 'Valide' : 'Utilisé',
-                      style: const pw.TextStyle(fontSize: 10, color: _pdfMuted),
-                    ),
-                  ],
-                ),
-                pw.SizedBox(height: 10),
-                pw.Text(
-                  ticket.eventTitle,
-                  style: pw.TextStyle(
-                    fontSize: 20,
-                    fontWeight: pw.FontWeight.bold,
-                    color: _pdfInk,
-                  ),
-                ),
-                if (ticket.seanceName != null) ...[
-                  pw.SizedBox(height: 4),
-                  pw.Text(ticket.seanceName!,
-                      style: const pw.TextStyle(fontSize: 11, color: _pdfMuted)),
-                ],
-                pw.SizedBox(height: 16),
-                pw.Divider(color: _pdfBorder),
-                pw.SizedBox(height: 16),
-                if (ticket.seanceStart != null)
-                  _infoRow('Date', dateFormat.format(ticket.seanceStart!)),
-                if (ticket.venue.isNotEmpty || ticket.city.isNotEmpty)
-                  _infoRow('Lieu', [ticket.venue, ticket.city]
-                      .where((e) => e.isNotEmpty)
-                      .join(', ')),
-                _infoRow('Type de billet', ticket.ticketTypeName),
-                _infoRow('Titulaire', ticket.buyerName),
-                _infoRow('Prix', '${_formatAmount(ticket.price)} XAF'),
-                pw.SizedBox(height: 20),
-                pw.Center(
+                // Photo de couverture de l'événement (le "flyer"), pour
+                // que le billet reste identifiable même partagé seul.
+                if (coverImage != null)
+                  pw.SizedBox(
+                    height: 130,
+                    width: double.infinity,
+                    child: pw.Image(coverImage, fit: pw.BoxFit.cover),
+                  )
+                else
+                  pw.Container(height: 90, width: double.infinity, color: _pdfInk),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.fromLTRB(28, 18, 28, 24),
                   child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.BarcodeWidget(
-                        barcode: pw.Barcode.qrCode(),
-                        data: ticket.code,
-                        width: 130,
-                        height: 130,
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: pw.CrossAxisAlignment.center,
+                        children: [
+                          pw.Row(
+                            children: [
+                              pw.SizedBox(height: 22, width: 22, child: pw.Image(logo)),
+                              pw.SizedBox(width: 8),
+                              pw.Text(
+                                'BILLET',
+                                style: pw.TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: _pdfPrimary,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                            ],
+                          ),
+                          pw.Text(
+                            ticket.status.name == 'valid' ? 'Valide' : 'Utilisé',
+                            style: const pw.TextStyle(fontSize: 10, color: _pdfMuted),
+                          ),
+                        ],
                       ),
-                      pw.SizedBox(height: 8),
+                      pw.SizedBox(height: 12),
                       pw.Text(
-                        ticket.code,
+                        ticket.eventTitle,
                         style: pw.TextStyle(
-                          fontSize: 13,
+                          fontSize: 20,
                           fontWeight: pw.FontWeight.bold,
-                          letterSpacing: 3,
                           color: _pdfInk,
                         ),
                       ),
+                      if (ticket.seanceName != null) ...[
+                        pw.SizedBox(height: 4),
+                        pw.Text(ticket.seanceName!,
+                            style: const pw.TextStyle(fontSize: 11, color: _pdfMuted)),
+                      ],
+                      pw.SizedBox(height: 16),
+                      pw.Divider(color: _pdfBorder),
+                      pw.SizedBox(height: 16),
+                      if (ticket.seanceStart != null)
+                        _infoRow('Date', dateFormat.format(ticket.seanceStart!)),
+                      if (ticket.venue.isNotEmpty || ticket.city.isNotEmpty)
+                        _infoRow('Lieu', [ticket.venue, ticket.city]
+                            .where((e) => e.isNotEmpty)
+                            .join(', ')),
+                      _infoRow('Type de billet', ticket.ticketTypeName),
+                      _infoRow('Titulaire', ticket.buyerName),
+                      _infoRow('Prix', '${_formatAmount(ticket.price)} XAF'),
+                      pw.SizedBox(height: 16),
+                      pw.Center(
+                        child: pw.Column(
+                          children: [
+                            pw.BarcodeWidget(
+                              barcode: pw.Barcode.qrCode(),
+                              data: ticket.code,
+                              width: 120,
+                              height: 120,
+                            ),
+                            pw.SizedBox(height: 8),
+                            pw.Text(
+                              ticket.code,
+                              style: pw.TextStyle(
+                                fontSize: 13,
+                                fontWeight: pw.FontWeight.bold,
+                                letterSpacing: 3,
+                                color: _pdfInk,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.SizedBox(height: 16),
+                      pw.Divider(color: _pdfBorder),
+                      pw.SizedBox(height: 6),
+                      pw.Text(
+                        'Présentez ce QR code à l\'entrée. Commande #${order.id.substring(0, order.id.length.clamp(0, 8))}',
+                        style: const pw.TextStyle(fontSize: 9, color: _pdfMuted),
+                      ),
                     ],
                   ),
-                ),
-                pw.Spacer(),
-                pw.Divider(color: _pdfBorder),
-                pw.SizedBox(height: 6),
-                pw.Text(
-                  'Présentez ce QR code à l\'entrée. Commande #${order.id.substring(0, order.id.length.clamp(0, 8))}',
-                  style: const pw.TextStyle(fontSize: 9, color: _pdfMuted),
                 ),
               ],
             );
@@ -120,6 +151,20 @@ class TicketPdfService {
     final file = File('${dir.path}/billets_${order.id}.pdf');
     await file.writeAsBytes(bytes, flush: true);
     return file;
+  }
+
+  /// Télécharge une image réseau pour l'embarquer dans le PDF. Renvoie
+  /// `null` en cas d'échec (réseau, URL absente) plutôt que de faire
+  /// échouer toute la génération du billet.
+  Future<pw.ImageProvider?> _fetchImage(String? url) async {
+    if (url == null || url.isEmpty) return null;
+    try {
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) return null;
+      return pw.MemoryImage(response.bodyBytes);
+    } catch (_) {
+      return null;
+    }
   }
 
   pw.Widget _infoRow(String label, String value) {

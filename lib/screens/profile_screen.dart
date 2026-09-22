@@ -345,11 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 168,
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF0F2A6B), Color(0xFFE30B4C)],
-                ),
+                color: authInk,
                 image: _bannerFile != null
                     ? DecorationImage(
                         image: FileImage(_bannerFile!), fit: BoxFit.cover)

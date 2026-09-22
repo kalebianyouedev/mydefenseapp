@@ -8,9 +8,9 @@ import 'auth_widgets.dart' show authPrimary, authInk, authMuted;
 /// Floating "liquid glass" bottom navigation bar (blurred, slightly
 /// transparent) with a raised center button.
 ///
-/// Order of the 5 sections: Events, My Orders, Post (center, raised red
-/// button — opens the Organisations flow before letting the user post),
-/// Posts, Account.
+/// Order of the 5 sections: Events, Votes (public feed — browse and vote
+/// on active campaigns), Posts (center, raised red button —
+/// quick-create an event or a vote campaign), My Orders, Account.
 class LiquidGlassNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -28,17 +28,17 @@ class LiquidGlassNavBar extends StatelessWidget {
       label: 'Events',
     ),
     _NavItem(
-      icon: Icons.confirmation_number_outlined,
-      activeIcon: Icons.confirmation_number_rounded,
-      label: 'Orders',
+      icon: Icons.how_to_vote_outlined,
+      activeIcon: Icons.how_to_vote_rounded,
+      label: 'Votes',
     ),
   ];
 
   static const _rightItems = [
     _NavItem(
-      icon: Icons.grid_view_outlined,
-      activeIcon: Icons.grid_view_rounded,
-      label: 'Posts',
+      icon: Icons.confirmation_number_outlined,
+      activeIcon: Icons.confirmation_number_rounded,
+      label: 'Orders',
     ),
     _NavItem(
       icon: Icons.person_outline_rounded,
@@ -153,7 +153,7 @@ class LiquidGlassNavBar extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Post',
+            'Posts',
             style: GoogleFonts.poppins(
               fontSize: 10,
               fontWeight: active ? FontWeight.w600 : FontWeight.w500,

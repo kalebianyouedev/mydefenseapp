@@ -8,8 +8,15 @@ import 'package:intl/intl.dart';
 import '../models/event.dart';
 import '../models/organisation.dart';
 import '../services/event_service.dart';
+import '../services/stockimg_client.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
+
+String _describeSaveError(Object e) {
+  if (e is StateError) return e.message;
+  if (e is StockImgException) return e.message;
+  return 'Échec de l\'enregistrement : $e';
+}
 
 const _stepLabels = ['Informations', 'Dates', 'Visuels', 'Options'];
 const _stepHints = [
@@ -219,7 +226,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showAuthSnack(context, e is StateError ? e.message : 'Échec de l\'enregistrement.');
+        showAuthSnack(context, _describeSaveError(e));
       }
     } finally {
       if (mounted) setState(() => _saving = false);

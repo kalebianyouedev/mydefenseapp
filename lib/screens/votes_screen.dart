@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../models/event.dart';
 import '../models/organisation.dart';
-import '../services/event_service.dart';
+import '../models/vote_campaign.dart';
+import '../services/vote_service.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted, authBorder;
-import 'create_event_screen.dart';
-import 'event_management_screen.dart';
+import 'create_vote_campaign_screen.dart';
+import 'vote_campaign_management_screen.dart';
 
-/// Liste des événements d'une organisation (brouillons, publiés,
-/// annulés) avec accès à la création d'un nouvel événement. Ouvert
-/// depuis "Tableau de bord" -> tuile "Événements".
-class EventsListScreen extends StatelessWidget {
+/// Liste des campagnes de vote d'une organisation, avec accès à la
+/// création d'une nouvelle campagne. Ouvert depuis "Tableau de bord" ->
+/// tuile "Votes".
+class VotesScreen extends StatelessWidget {
   final Organisation organisation;
 
-  const EventsListScreen({super.key, required this.organisation});
+  const VotesScreen({super.key, required this.organisation});
 
   @override
   Widget build(BuildContext context) {
@@ -25,33 +25,33 @@ class EventsListScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Événements — ${organisation.name}',
+        title: Text('Votes — ${organisation.name}',
             style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final eventId = await Navigator.of(context).push<String>(
-            MaterialPageRoute(builder: (_) => CreateEventScreen(organisation: organisation)),
+          final campaignId = await Navigator.of(context).push<String>(
+            MaterialPageRoute(builder: (_) => CreateVoteCampaignScreen(organisation: organisation)),
           );
-          if (eventId != null && context.mounted) {
+          if (campaignId != null && context.mounted) {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => EventManagementScreen(eventId: eventId)),
+              MaterialPageRoute(builder: (_) => VoteCampaignManagementScreen(campaignId: campaignId)),
             );
           }
         },
         backgroundColor: authPrimary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Nouvel événement', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white)),
+        label: Text('Nouvelle campagne', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white)),
       ),
       body: SafeArea(
-        child: StreamBuilder<List<Event>>(
-          stream: EventService.instance.watchByOrganisation(organisation.id),
+        child: StreamBuilder<List<VoteCampaign>>(
+          stream: VoteService.instance.watchByOrganisation(organisation.id),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator(color: authPrimary));
             }
-            final events = snapshot.data!;
-            if (events.isEmpty) {
+            final campaigns = snapshot.data!;
+            if (campaigns.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
@@ -62,12 +62,12 @@ class EventsListScreen extends StatelessWidget {
                         width: 88,
                         height: 88,
                         decoration: const BoxDecoration(color: Color(0xFFF4F4F6), shape: BoxShape.circle),
-                        child: const Icon(Icons.event_outlined, size: 36, color: authMuted),
+                        child: const Icon(Icons.emoji_events_outlined, size: 36, color: authMuted),
                       ),
                       const SizedBox(height: 18),
-                      Text('Aucun événement', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+                      Text('Aucune campagne de vote', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
                       const SizedBox(height: 6),
-                      Text('Créez votre premier événement avec le bouton ci-dessous.',
+                      Text('Créez votre première campagne avec le bouton ci-dessous.',
                           textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
                     ],
                   ),
@@ -76,9 +76,9 @@ class EventsListScreen extends StatelessWidget {
             }
             return ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-              itemCount: events.length,
+              itemCount: campaigns.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, i) => _EventListTile(event: events[i]),
+              itemBuilder: (context, i) => _CampaignTile(campaign: campaigns[i]),
             );
           },
         ),
@@ -87,18 +87,18 @@ class EventsListScreen extends StatelessWidget {
   }
 }
 
-class _EventListTile extends StatelessWidget {
-  final Event event;
+class _CampaignTile extends StatelessWidget {
+  final VoteCampaign campaign;
 
-  const _EventListTile({required this.event});
+  const _CampaignTile({required this.campaign});
 
   @override
   Widget build(BuildContext context) {
-    final seance = event.primarySeance;
-    final (label, color) = switch (event.status) {
-      EventStatus.draft => ('Brouillon', authMuted),
-      EventStatus.published => ('Publié', const Color(0xFF1E9E6B)),
-      EventStatus.cancelled => ('Annulé', authPrimary),
+    final (label, color) = switch (campaign.status) {
+      VoteCampaignStatus.draft => ('Brouillon', authMuted),
+      VoteCampaignStatus.active => ('Actif', const Color(0xFF1E9E6B)),
+      VoteCampaignStatus.ended => ('Terminé', authMuted),
+      VoteCampaignStatus.cancelled => ('Annulé', authPrimary),
     };
     return Material(
       color: Colors.white,
@@ -106,7 +106,7 @@ class _EventListTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => EventManagementScreen(eventId: event.id)),
+          MaterialPageRoute(builder: (_) => VoteCampaignManagementScreen(campaignId: campaign.id)),
         ),
         child: Container(
           padding: const EdgeInsets.all(12),
@@ -120,12 +120,12 @@ class _EventListTile extends StatelessWidget {
                   height: 64,
                   decoration: BoxDecoration(
                     color: authInk,
-                    image: event.coverImageUrl != null
-                        ? DecorationImage(image: NetworkImage(event.coverImageUrl!), fit: BoxFit.cover)
+                    image: campaign.coverImageUrl != null
+                        ? DecorationImage(image: NetworkImage(campaign.coverImageUrl!), fit: BoxFit.cover)
                         : null,
                   ),
-                  child: event.coverImageUrl == null
-                      ? const Icon(Icons.event_outlined, color: Colors.white70)
+                  child: campaign.coverImageUrl == null
+                      ? const Icon(Icons.emoji_events_outlined, color: Colors.white70)
                       : null,
                 ),
               ),
@@ -140,11 +140,11 @@ class _EventListTile extends StatelessWidget {
                       child: Text(label, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
                     ),
                     const SizedBox(height: 6),
-                    Text(event.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    Text(campaign.title, maxLines: 1, overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
-                    if (seance != null) ...[
+                    if (campaign.endsAt != null) ...[
                       const SizedBox(height: 3),
-                      Text(DateFormat('d MMM y', 'fr_FR').format(seance.start),
+                      Text('Fin le ${DateFormat('d MMM y', 'fr_FR').format(campaign.endsAt!)}',
                           style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
                     ],
                   ],

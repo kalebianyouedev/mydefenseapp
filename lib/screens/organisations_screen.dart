@@ -6,31 +6,15 @@ import '../models/organisation.dart';
 import '../services/organisation_service.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted, authBorder;
 import 'create_organisation_screen.dart';
-import 'create_post_screen.dart';
+import 'organisation_hub_screen.dart';
 
 const _orgBlue = Color(0xFF1E3A6B);
 
-/// Point d'entrée du bouton "Post" : une organisation est requise avant
-/// de publier. Ouvre "Vos organisations" en mode sélection ; une fois une
-/// organisation choisie (ou créée), enchaîne directement sur l'écran de
-/// création de publication.
-Future<void> openPostFlow(BuildContext context) async {
-  final organisation = await Navigator.of(context).push<Organisation>(
-    MaterialPageRoute(builder: (_) => const OrganisationsScreen(selectMode: true)),
-  );
-  if (organisation == null || !context.mounted) return;
-  await Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => CreatePostScreen(organisation: organisation),
-    ),
-  );
-}
-
 /// "Vos organisations" : liste des organisations de l'utilisateur, avec
-/// création si aucune n'existe encore. Une organisation est requise
-/// avant de pouvoir publier — [selectMode] fait que taper sur une
-/// organisation (ou en créer une) renvoie ("pop") cette organisation à
-/// l'écran appelant plutôt que de rester sur cette page.
+/// création si aucune n'existe encore. [selectMode] fait que taper sur
+/// une organisation (ou en créer une) renvoie ("pop") cette organisation
+/// à l'écran appelant — utilisé par le raccourci de création rapide
+/// (bouton "Posts").
 class OrganisationsScreen extends StatelessWidget {
   final bool selectMode;
 
@@ -43,7 +27,12 @@ class OrganisationsScreen extends StatelessWidget {
     if (created == null || !context.mounted) return;
     if (selectMode) {
       Navigator.of(context).pop(created);
+      return;
     }
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const OrganisationHubScreen()),
+      (route) => route.isFirst,
+    );
   }
 
   @override

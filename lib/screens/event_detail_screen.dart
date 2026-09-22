@@ -72,6 +72,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 const SizedBox(height: 16),
                                 Text(event.description, style: GoogleFonts.poppins(fontSize: 13.5, color: authInk, height: 1.5)),
                               ],
+                              if (event.gallery.isNotEmpty) ...[
+                                const SizedBox(height: 20),
+                                Text('Photos', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                                const SizedBox(height: 10),
+                                _Gallery(images: event.gallery),
+                              ],
                               if (event.seances.length > 1) ...[
                                 const SizedBox(height: 20),
                                 Text('Séances', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
@@ -174,28 +180,147 @@ class _Cover extends StatelessWidget {
 
   const _Cover({required this.event});
 
+  Widget _fallback() {
+    return Container(
+      decoration: const BoxDecoration(color: authInk),
+      child: const Center(child: Icon(Icons.festival_outlined, size: 52, color: Colors.white70)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          height: 220,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF0F2A6B), Color(0xFFE30B4C)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-            image: event.coverImageUrl != null ? DecorationImage(image: NetworkImage(event.coverImageUrl!), fit: BoxFit.cover) : null,
+    return SizedBox(
+      height: 280,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          event.coverImageUrl != null
+              ? Image.network(
+                  event.coverImageUrl!,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
+                      color: const Color(0xFFF4F4F6),
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(color: authPrimary, strokeWidth: 2.4),
+                    );
+                  },
+                  errorBuilder: (_, _, _) => _fallback(),
+                )
+              : _fallback(),
+          // Léger dégradé pour garder le bouton retour lisible sur toute photo.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black26, Colors.transparent],
+                stops: [0.0, 0.35],
+              ),
+            ),
           ),
-        ),
-        Positioned(
-          top: 8,
-          left: 8,
-          child: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: IconButton.styleFrom(backgroundColor: Colors.black.withOpacity(0.35)),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: IconButton.styleFrom(backgroundColor: Colors.black.withOpacity(0.35)),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Galerie de photos de l'événement (en plus de la couverture), en
+/// vignettes défilables horizontalement, ouvrables en plein écran.
+class _Gallery extends StatelessWidget {
+  final List<String> images;
+
+  const _Gallery({required this.images});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final url = images[index];
+          return GestureDetector(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => _GalleryViewer(images: images, initialIndex: index),
+                fullscreenDialog: true,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.network(
+                url,
+                width: 96,
+                height: 96,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) => progress == null
+                    ? child
+                    : Container(width: 96, height: 96, color: const Color(0xFFF4F4F6)),
+                errorBuilder: (_, _, _) => Container(
+                  width: 96,
+                  height: 96,
+                  color: const Color(0xFFF4F4F6),
+                  child: const Icon(Icons.broken_image_outlined, color: authMuted),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Visionneuse plein écran des photos de la galerie, avec pagination
+/// swipeable façon carrousel.
+class _GalleryViewer extends StatelessWidget {
+  final List<String> images;
+  final int initialIndex;
+
+  const _GalleryViewer({required this.images, required this.initialIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: PageController(initialPage: initialIndex),
+              itemCount: images.length,
+              itemBuilder: (context, index) => Center(
+                child: InteractiveViewer(
+                  child: Image.network(images[index], fit: BoxFit.contain),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: IconButton.styleFrom(backgroundColor: Colors.black.withOpacity(0.35)),
+                icon: const Icon(Icons.close, color: Colors.white),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

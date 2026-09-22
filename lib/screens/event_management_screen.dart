@@ -287,11 +287,7 @@ class _CoverHeader extends StatelessWidget {
           height: 190,
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0F2A6B), Color(0xFFE30B4C)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: authInk,
             image: event.coverImageUrl != null
                 ? DecorationImage(image: NetworkImage(event.coverImageUrl!), fit: BoxFit.cover)
                 : null,

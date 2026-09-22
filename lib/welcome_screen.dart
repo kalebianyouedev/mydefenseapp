@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'login_screen.dart';
+import 'widgets/auth_widgets.dart' show authInk;
 
 /// 4-page scrollable onboarding, shown after the splash screen.
 class WelcomeScreen extends StatefulWidget {
@@ -144,17 +145,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   errorBuilder:
                                       (context, error, stackTrace) =>
                                       Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              const Color(0xFF0F2A6B)
-                                                  .withOpacity(0.9),
-                                              const Color(0xFFE30B4C)
-                                                  .withOpacity(0.85),
-                                            ],
-                                          ),
+                                        decoration: const BoxDecoration(
+                                          color: authInk,
                                         ),
                                         child: Center(
                                           child: Icon(

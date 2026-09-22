@@ -8,8 +8,8 @@ import 'screens/account_screen.dart';
 import 'screens/event_detail_screen.dart';
 import 'screens/my_orders_screen.dart';
 import 'screens/organisation_hub_screen.dart';
-import 'screens/organisations_screen.dart';
-import 'screens/reels_screen.dart';
+import 'screens/public_votes_screen.dart';
+import 'screens/quick_create_flow.dart';
 import 'services/event_service.dart';
 import 'services/organisation_service.dart';
 import 'widgets/auth_widgets.dart'
@@ -35,8 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: false,
         child: switch (_navIndex) {
           0 => const _EventsTab(),
-          1 => const MyOrdersScreen(),
-          3 => const ReelsScreen(),
+          1 => const PublicVotesScreen(),
+          3 => const MyOrdersScreen(),
           4 => const AccountScreen(),
           _ => const SizedBox.shrink(),
         },
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _navIndex,
         onTap: (index) {
           if (index == 2) {
-            openPostFlow(context);
+            openQuickCreateFlow(context);
           } else {
             setState(() => _navIndex = index);
           }
@@ -251,11 +251,7 @@ class _EventCard extends StatelessWidget {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF0F2A6B), Color(0xFFE30B4C)],
-                      ),
+                      color: authInk,
                       image: event.coverImageUrl != null
                           ? DecorationImage(
                               image: NetworkImage(event.coverImageUrl!),
