@@ -89,6 +89,7 @@ class TicketOrder {
   final String? eventCoverImageUrl;
   final String eventVenue;
   final String eventCity;
+  final String ownerId;
 
   final String buyerId;
   final String buyerName;
@@ -112,6 +113,7 @@ class TicketOrder {
     this.eventCoverImageUrl,
     this.eventVenue = '',
     this.eventCity = '',
+    required this.ownerId,
     required this.buyerId,
     required this.buyerName,
     required this.items,
@@ -138,6 +140,7 @@ class TicketOrder {
       eventCoverImageUrl: map['eventCoverImageUrl'] as String?,
       eventVenue: map['eventVenue'] as String? ?? '',
       eventCity: map['eventCity'] as String? ?? '',
+      ownerId: map['ownerId'] as String? ?? '',
       buyerId: map['buyerId'] as String? ?? '',
       buyerName: map['buyerName'] as String? ?? '',
       items: rawItems
@@ -162,6 +165,7 @@ class TicketOrder {
       'eventCoverImageUrl': eventCoverImageUrl,
       'eventVenue': eventVenue,
       'eventCity': eventCity,
+      'ownerId': ownerId,
       'buyerId': buyerId,
       'buyerName': buyerName,
       'items': items.map((i) => i.toMap()).toList(),

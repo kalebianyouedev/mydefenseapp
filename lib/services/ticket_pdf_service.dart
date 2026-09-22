@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,8 +26,6 @@ class TicketPdfService {
     final doc = pw.Document();
     final dateFormat = DateFormat("EEEE d MMMM y 'à' HH'h'mm", 'fr_FR');
 
-    final logoBytes = await rootBundle.load('assets/images/logo.png');
-    final logo = pw.MemoryImage(logoBytes.buffer.asUint8List());
     final coverImage = await _fetchImage(order.eventCoverImageUrl);
 
     for (final ticket in tickets) {
@@ -61,15 +58,23 @@ class TicketPdfService {
                         children: [
                           pw.Row(
                             children: [
-                              pw.SizedBox(height: 22, width: 22, child: pw.Image(logo)),
-                              pw.SizedBox(width: 8),
                               pw.Text(
-                                'BILLET',
+                                'ÇA BOUGE',
                                 style: pw.TextStyle(
                                   fontSize: 12,
                                   fontWeight: pw.FontWeight.bold,
                                   color: _pdfPrimary,
-                                  letterSpacing: 2,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              pw.SizedBox(width: 8),
+                              pw.Text(
+                                '· BILLET',
+                                style: pw.TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: _pdfInk,
+                                  letterSpacing: 1.5,
                                 ),
                               ),
                             ],

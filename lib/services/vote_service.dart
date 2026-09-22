@@ -265,6 +265,7 @@ class VoteService {
       campaignTitle: campaign.title,
       organisationId: campaign.organisationId,
       organisationName: campaign.organisationName,
+      ownerId: campaign.ownerId,
       categoryId: category.id,
       categoryTitle: category.title,
       candidateId: candidate.id,

@@ -139,11 +139,14 @@ service cloud.firestore {
       }
     }
 
-    // Achats de votes (Orange Money / MTN Mobile Money simulés).
+    // Achats de votes (Orange Money / MTN Mobile Money simulés). Le
+    // champ `ownerId` (propriétaire de la campagne au moment de l'achat)
+    // est dupliqué sur la commande pour éviter un get() imbriqué dans
+    // les règles — plus robuste si la campagne est supprimée ensuite.
     match /voteOrders/{orderId} {
       allow read: if request.auth != null &&
                      (resource.data.buyerId == request.auth.uid ||
-                      get(/databases/$(database)/documents/voteCampaigns/$(resource.data.campaignId)).data.ownerId == request.auth.uid);
+                      resource.data.ownerId == request.auth.uid);
       allow create: if request.auth != null &&
                        request.resource.data.buyerId == request.auth.uid;
       allow update: if request.auth != null &&
@@ -161,11 +164,16 @@ service cloud.firestore {
                        resource.data.ownerId == request.auth.uid;
     }
 
-    // Commandes de billets (Orange Money / MTN Mobile Money simulés).
+    // Commandes de billets (Orange Money / MTN Mobile Money simulés). Le
+    // champ `ownerId` (propriétaire de l'événement au moment de l'achat)
+    // est dupliqué sur la commande pour éviter un get() imbriqué dans
+    // les règles — plus robuste si l'événement est supprimé ensuite, et
+    // c'est ce qui permet au portefeuille de l'organisation de lire
+    // toutes ses commandes sans crainte de permission-denied.
     match /orders/{orderId} {
       allow read: if request.auth != null &&
                      (resource.data.buyerId == request.auth.uid ||
-                      get(/databases/$(database)/documents/events/$(resource.data.eventId)).data.ownerId == request.auth.uid);
+                      resource.data.ownerId == request.auth.uid);
       allow create: if request.auth != null &&
                        request.resource.data.buyerId == request.auth.uid;
       // Confirmation du paiement (pending -> confirmed) par l'acheteur
@@ -178,12 +186,12 @@ service cloud.firestore {
     match /tickets/{ticketId} {
       allow read: if request.auth != null &&
                      (resource.data.buyerId == request.auth.uid ||
-                      get(/databases/$(database)/documents/events/$(resource.data.eventId)).data.ownerId == request.auth.uid);
+                      resource.data.ownerId == request.auth.uid);
       allow create: if request.auth != null &&
                        request.resource.data.buyerId == request.auth.uid;
       // Check-in à l'entrée : réservé au propriétaire de l'événement.
       allow update: if request.auth != null &&
-                       get(/databases/$(database)/documents/events/$(resource.data.eventId)).data.ownerId == request.auth.uid;
+                       resource.data.ownerId == request.auth.uid;
     }
   }
 }

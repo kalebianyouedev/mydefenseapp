@@ -36,6 +36,7 @@ class VoteOrder {
   final String campaignTitle;
   final String organisationId;
   final String organisationName;
+  final String ownerId;
   final String categoryId;
   final String categoryTitle;
   final String candidateId;
@@ -61,6 +62,7 @@ class VoteOrder {
     required this.campaignTitle,
     required this.organisationId,
     required this.organisationName,
+    required this.ownerId,
     required this.categoryId,
     required this.categoryTitle,
     required this.candidateId,
@@ -86,6 +88,7 @@ class VoteOrder {
       campaignTitle: map['campaignTitle'] as String? ?? '',
       organisationId: map['organisationId'] as String? ?? '',
       organisationName: map['organisationName'] as String? ?? '',
+      ownerId: map['ownerId'] as String? ?? '',
       categoryId: map['categoryId'] as String? ?? '',
       categoryTitle: map['categoryTitle'] as String? ?? '',
       candidateId: map['candidateId'] as String? ?? '',
@@ -110,6 +113,7 @@ class VoteOrder {
       'campaignTitle': campaignTitle,
       'organisationId': organisationId,
       'organisationName': organisationName,
+      'ownerId': ownerId,
       'categoryId': categoryId,
       'categoryTitle': categoryTitle,
       'candidateId': candidateId,

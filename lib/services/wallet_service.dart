@@ -77,26 +77,34 @@ class WalletService {
 
   String? get _uid => AuthService.instance.currentUser?.uid;
 
+  /// Exécute une requête et renvoie ses documents, ou une liste vide si
+  /// elle échoue (permission refusée sur un vieux document sans
+  /// `ownerId`, index en cours de construction, réseau...). Le
+  /// portefeuille reste ainsi une estimation qui s'affiche toujours,
+  /// plutôt qu'un tout-ou-rien qui casse sur la moindre donnée isolée.
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _safeDocs(
+      Query<Map<String, dynamic>> query) async {
+    try {
+      final snap = await query.get().timeout(_timeout);
+      return snap.docs;
+    } catch (_) {
+      return const [];
+    }
+  }
+
   /// Additionne les commandes confirmées de tous les événements de
   /// l'organisation, puis retire ce qui a déjà été retiré ou est en
   /// attente de retrait, pour obtenir le solde disponible.
   Future<WalletSummary> fetchSummary(String organisationId) async {
-    final eventsSnap = await _db
-        .collection('events')
-        .where('organisationId', isEqualTo: organisationId)
-        .get()
-        .timeout(_timeout);
+    final eventDocs = await _safeDocs(
+        _db.collection('events').where('organisationId', isEqualTo: organisationId));
 
     num gross = 0;
-    final ordersSnaps = await Future.wait(eventsSnap.docs.map(
-      (eventDoc) => _db
-          .collection('orders')
-          .where('eventId', isEqualTo: eventDoc.id)
-          .get()
-          .timeout(_timeout),
+    final ordersDocsList = await Future.wait(eventDocs.map(
+      (eventDoc) => _safeDocs(_db.collection('orders').where('eventId', isEqualTo: eventDoc.id)),
     ));
-    for (final ordersSnap in ordersSnaps) {
-      for (final orderDoc in ordersSnap.docs) {
+    for (final orderDocs in ordersDocsList) {
+      for (final orderDoc in orderDocs) {
         final order = TicketOrder.fromMap(orderDoc.id, orderDoc.data());
         if (order.status == OrderStatus.confirmed) {
           gross += order.totalAmount;
@@ -106,25 +114,20 @@ class WalletService {
 
     // Recettes des campagnes de vote de l'organisation (achats de votes
     // confirmés), qui comptent pour le même solde.
-    final voteOrdersSnap = await _db
-        .collection('voteOrders')
-        .where('organisationId', isEqualTo: organisationId)
-        .get()
-        .timeout(_timeout);
-    for (final doc in voteOrdersSnap.docs) {
+    final voteOrderDocs = await _safeDocs(
+        _db.collection('voteOrders').where('organisationId', isEqualTo: organisationId));
+    for (final doc in voteOrderDocs) {
       final order = VoteOrder.fromMap(doc.id, doc.data());
       if (order.status == VoteOrderStatus.confirmed) {
         gross += order.totalAmount;
       }
     }
 
-    final withdrawalsSnap = await _withdrawals
-        .where('organisationId', isEqualTo: organisationId)
-        .get()
-        .timeout(_timeout);
+    final withdrawalDocs =
+        await _safeDocs(_withdrawals.where('organisationId', isEqualTo: organisationId));
     num withdrawn = 0;
     num pending = 0;
-    for (final doc in withdrawalsSnap.docs) {
+    for (final doc in withdrawalDocs) {
       final w = Withdrawal.fromMap(doc.id, doc.data());
       if (w.status == WithdrawalStatus.paid) {
         withdrawn += w.amount;
@@ -154,21 +157,14 @@ class WalletService {
   Future<List<WalletTransaction>> fetchTransactions(String organisationId) async {
     final transactions = <WalletTransaction>[];
 
-    final eventsSnap = await _db
-        .collection('events')
-        .where('organisationId', isEqualTo: organisationId)
-        .get()
-        .timeout(_timeout);
-    final ordersSnaps = await Future.wait(eventsSnap.docs.map(
-      (eventDoc) => _db
-          .collection('orders')
-          .where('eventId', isEqualTo: eventDoc.id)
-          .get()
-          .timeout(_timeout),
+    final eventDocs = await _safeDocs(
+        _db.collection('events').where('organisationId', isEqualTo: organisationId));
+    final ordersDocsList = await Future.wait(eventDocs.map(
+      (eventDoc) => _safeDocs(_db.collection('orders').where('eventId', isEqualTo: eventDoc.id)),
     ));
-    for (var i = 0; i < eventsSnap.docs.length; i++) {
-      final eventTitle = eventsSnap.docs[i].data()['title'] as String? ?? '';
-      for (final orderDoc in ordersSnaps[i].docs) {
+    for (var i = 0; i < eventDocs.length; i++) {
+      final eventTitle = eventDocs[i].data()['title'] as String? ?? '';
+      for (final orderDoc in ordersDocsList[i]) {
         final order = TicketOrder.fromMap(orderDoc.id, orderDoc.data());
         if (order.status != OrderStatus.confirmed) continue;
         transactions.add(WalletTransaction(
@@ -181,12 +177,9 @@ class WalletService {
       }
     }
 
-    final voteOrdersSnap = await _db
-        .collection('voteOrders')
-        .where('organisationId', isEqualTo: organisationId)
-        .get()
-        .timeout(_timeout);
-    for (final doc in voteOrdersSnap.docs) {
+    final voteOrderDocs = await _safeDocs(
+        _db.collection('voteOrders').where('organisationId', isEqualTo: organisationId));
+    for (final doc in voteOrderDocs) {
       final order = VoteOrder.fromMap(doc.id, doc.data());
       if (order.status != VoteOrderStatus.confirmed) continue;
       transactions.add(WalletTransaction(

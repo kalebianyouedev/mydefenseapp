@@ -34,7 +34,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       await OrderService.instance.confirmOrder(widget.orderId);
     } catch (e) {
       if (mounted) {
-        showAuthSnack(context, e is StateError ? e.message : 'Échec de la confirmation.');
+        showAuthSnack(context, e is StateError ? e.message : 'Échec de la confirmation : $e');
       }
     } finally {
       if (mounted) setState(() => _confirming = false);
@@ -45,8 +45,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     setState(() => _sharing = true);
     try {
       await TicketPdfService.instance.shareTickets(order: order, tickets: tickets);
-    } catch (_) {
-      if (mounted) showAuthSnack(context, 'Échec de la génération du PDF.');
+    } catch (e) {
+      if (mounted) showAuthSnack(context, 'Échec de la génération du PDF : $e');
     } finally {
       if (mounted) setState(() => _sharing = false);
     }

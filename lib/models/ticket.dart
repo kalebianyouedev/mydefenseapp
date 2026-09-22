@@ -34,6 +34,7 @@ class Ticket {
   final String eventId;
   final String eventTitle;
   final String? eventCoverImageUrl;
+  final String ownerId;
   final String venue;
   final String city;
   final DateTime? seanceStart;
@@ -57,6 +58,7 @@ class Ticket {
     required this.eventId,
     required this.eventTitle,
     this.eventCoverImageUrl,
+    required this.ownerId,
     this.venue = '',
     this.city = '',
     this.seanceStart,
@@ -82,6 +84,7 @@ class Ticket {
       eventId: map['eventId'] as String? ?? '',
       eventTitle: map['eventTitle'] as String? ?? '',
       eventCoverImageUrl: map['eventCoverImageUrl'] as String?,
+      ownerId: map['ownerId'] as String? ?? '',
       venue: map['venue'] as String? ?? '',
       city: map['city'] as String? ?? '',
       seanceStart:
@@ -106,6 +109,7 @@ class Ticket {
       'eventId': eventId,
       'eventTitle': eventTitle,
       'eventCoverImageUrl': eventCoverImageUrl,
+      'ownerId': ownerId,
       'venue': venue,
       'city': city,
       'seanceStart': seanceStart == null ? null : Timestamp.fromDate(seanceStart!),
