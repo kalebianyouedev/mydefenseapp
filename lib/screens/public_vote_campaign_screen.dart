@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,33 @@ import '../services/vote_service.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
 import 'vote_order_confirmation_screen.dart';
+
+/// Palette catégorielle validée (voir la skill dataviz) : ordre fixe,
+/// distincte en daltonisme. Assignée par le numéro (stable) du candidat,
+/// jamais par son rang courant, pour que sa couleur ne change pas quand
+/// le classement bouge.
+const _categoricalPalette = [
+  Color(0xFF2A78D6), // bleu
+  Color(0xFFEB6834), // orange
+  Color(0xFF1BAF7A), // aqua
+  Color(0xFFEDA100), // jaune
+  Color(0xFFE87BA4), // magenta
+  Color(0xFF008300), // vert
+  Color(0xFF4A3AA7), // violet
+  Color(0xFFE34948), // rouge
+];
+
+/// Couleur stable par candidat : assignée dans l'ordre de son numéro
+/// (fixe depuis sa création), jamais dans l'ordre du classement courant,
+/// pour que sa couleur reste la même partout (camembert, classement,
+/// carte) même quand le classement bouge.
+Map<String, Color> _stableCandidateColors(List<VoteCandidate> candidates) {
+  final byNumber = [...candidates]..sort((a, b) => a.number.compareTo(b.number));
+  return {
+    for (var i = 0; i < byNumber.length; i++)
+      byNumber[i].id: _categoricalPalette[i % _categoricalPalette.length],
+  };
+}
 
 /// Page publique d'une campagne de vote : description, catégories et
 /// candidats, avec achat de votes par Mobile Money. Ouverte depuis le
@@ -208,28 +236,17 @@ class _CategorySection extends StatelessWidget {
                 return Text('Aucun candidat pour le moment.', style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted));
               }
               final totalVotes = candidates.fold<int>(0, (sum, c) => sum + c.voteCount);
-              final leader = candidates.first;
+              final colors = _stableCandidateColors(candidates);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (totalVotes > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.emoji_events, size: 16, color: Color(0xFFC9971A)),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              '${leader.name} en tête avec ${(leader.voteCount / totalVotes * 100).toStringAsFixed(0)}%',
-                              style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w700, color: authInk),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _CategoryStats(candidates: candidates, totalVotes: totalVotes),
+                  ),
                   ...candidates.asMap().entries.map((entry) => _CandidateCard(
                         candidate: entry.value,
+                        color: colors[entry.value.id]!,
                         isLeader: entry.key == 0 && totalVotes > 0,
                         percentage: totalVotes == 0 ? 0 : entry.value.voteCount / totalVotes * 100,
                         canVote: campaign.isOpenForVoting,
@@ -246,8 +263,117 @@ class _CategorySection extends StatelessWidget {
   }
 }
 
+/// Statistiques d'une catégorie : répartition des votes en camembert
+/// (une couleur stable par candidat, jamais par rang) et classement
+/// numéroté juste en dessous.
+class _CategoryStats extends StatelessWidget {
+  final List<VoteCandidate> candidates;
+  final int totalVotes;
+
+  const _CategoryStats({required this.candidates, required this.totalVotes});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = _stableCandidateColors(candidates);
+
+    if (totalVotes == 0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(18)),
+        child: Text('Aucun vote pour le moment dans cette catégorie.',
+            style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(border: Border.all(color: authBorder), borderRadius: BorderRadius.circular(18)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Répartition des votes', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 140,
+            child: PieChart(
+              PieChartData(
+                sectionsSpace: 2,
+                centerSpaceRadius: 34,
+                sections: candidates.map((c) {
+                  final pct = c.voteCount / totalVotes * 100;
+                  return PieChartSectionData(
+                    value: c.voteCount.toDouble(),
+                    color: colors[c.id],
+                    radius: 36,
+                    showTitle: pct >= 8,
+                    title: '${pct.toStringAsFixed(0)}%',
+                    titleStyle: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text('Classement', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
+          const SizedBox(height: 10),
+          ...candidates.asMap().entries.map((entry) {
+            final rank = entry.key + 1;
+            final candidate = entry.value;
+            final pct = candidate.voteCount / totalVotes * 100;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  _RankBadge(rank: rank),
+                  const SizedBox(width: 10),
+                  Container(width: 9, height: 9, decoration: BoxDecoration(color: colors[candidate.id], shape: BoxShape.circle)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(candidate.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+                  ),
+                  Text('${candidate.voteCount} · ${pct.toStringAsFixed(0)}%',
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: authMuted)),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankBadge extends StatelessWidget {
+  final int rank;
+
+  const _RankBadge({required this.rank});
+
+  static const _medalColors = {
+    1: Color(0xFFC9971A),
+    2: Color(0xFF9AA0A6),
+    3: Color(0xFFB56A3C),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _medalColors[rank] ?? authMuted;
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(color: color.withOpacity(rank <= 3 ? 1 : 0.12), shape: BoxShape.circle),
+      child: Center(
+        child: Text('$rank',
+            style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: rank <= 3 ? Colors.white : authMuted)),
+      ),
+    );
+  }
+}
+
 class _CandidateCard extends StatelessWidget {
   final VoteCandidate candidate;
+  final Color color;
   final bool isLeader;
   final double percentage;
   final bool canVote;
@@ -256,6 +382,7 @@ class _CandidateCard extends StatelessWidget {
 
   const _CandidateCard({
     required this.candidate,
+    required this.color,
     required this.isLeader,
     required this.percentage,
     required this.canVote,
@@ -358,7 +485,7 @@ class _CandidateCard extends StatelessWidget {
                     value: percentage / 100,
                     minHeight: 8,
                     backgroundColor: const Color(0xFFF4F4F6),
-                    color: isLeader ? const Color(0xFFC9971A) : authPrimary,
+                    color: color,
                   ),
                 ),
               ),

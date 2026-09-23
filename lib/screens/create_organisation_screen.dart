@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../services/ai_service.dart';
 import '../services/organisation_service.dart';
+import '../widgets/ai_generate_button.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
 
@@ -147,15 +149,33 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(
-                'Description (optionnel)',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: authInk,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Description (optionnel)',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: authInk,
+                      ),
+                    ),
+                  ),
+                  AiGenerateButton(
+                    controller: _descriptionCtrl,
+                    validate: () => _nameCtrl.text.trim().isEmpty
+                        ? "Renseignez d'abord le nom de l'organisation."
+                        : null,
+                    generate: (instructions) => AiService.instance
+                        .generateOrganisationDescription(
+                      name: _nameCtrl.text.trim(),
+                      existing: _descriptionCtrl.text,
+                      instructions: instructions,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               TextField(
                 controller: _descriptionCtrl,
                 minLines: 3,

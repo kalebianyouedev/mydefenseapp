@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import '../models/vote_campaign.dart';
 import '../models/vote_candidate.dart';
 import '../models/vote_category.dart';
+import '../services/ai_service.dart';
 import '../services/vote_service.dart';
+import '../widgets/ai_generate_button.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
 
@@ -243,7 +245,20 @@ class _CandidateFormState extends State<_CandidateForm> {
           TextField(controller: _descriptionCtrl, decoration: const InputDecoration(labelText: 'Description courte (ex. Étudiante, 22 ans)')),
           const SizedBox(height: 12),
           TextField(controller: _bioCtrl, minLines: 2, maxLines: 4, decoration: const InputDecoration(labelText: 'Bio (optionnel)')),
-          const SizedBox(height: 20),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AiGenerateButton(
+              controller: _bioCtrl,
+              validate: () => _nameCtrl.text.trim().isEmpty ? "Renseignez d'abord le nom du candidat." : null,
+              generate: (instructions) => AiService.instance.generateCandidateBio(
+                name: _nameCtrl.text.trim(),
+                shortDescription: _descriptionCtrl.text,
+                existing: _bioCtrl.text,
+                instructions: instructions,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             height: 50,

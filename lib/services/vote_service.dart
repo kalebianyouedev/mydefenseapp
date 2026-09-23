@@ -130,6 +130,39 @@ class VoteService {
         .handleError((_) => <VoteCampaign>[]);
   }
 
+  /// Version ponctuelle de [watchActive], pour l'assistant IA.
+  Future<List<VoteCampaign>> fetchActive({int limit = 20}) async {
+    final snap = await _campaigns
+        .where('status', isEqualTo: 'active')
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .get()
+        .timeout(_timeout);
+    return snap.docs.map((d) => VoteCampaign.fromMap(d.id, d.data())).toList();
+  }
+
+  Future<List<VoteCategory>> fetchCategories(String campaignId) async {
+    final snap = await _categories(campaignId)
+        .orderBy('createdAt', descending: false)
+        .get()
+        .timeout(_timeout);
+    return snap.docs.map((d) => VoteCategory.fromMap(d.id, d.data())).toList();
+  }
+
+  /// Candidats les plus votés d'une catégorie (classement).
+  Future<List<VoteCandidate>> fetchTopCandidates(
+      String campaignId, String categoryId,
+      {int limit = 10}) async {
+    final snap = await _candidates(campaignId, categoryId)
+        .orderBy('voteCount', descending: true)
+        .limit(limit)
+        .get()
+        .timeout(_timeout);
+    return snap.docs
+        .map((d) => VoteCandidate.fromMap(d.id, d.data()))
+        .toList();
+  }
+
   Stream<VoteCampaign?> watchOne(String campaignId) {
     return _campaigns
         .doc(campaignId)
@@ -312,7 +345,10 @@ class VoteService {
 
   /// Commandes de votes d'une campagne, pour sa vue financière.
   Stream<List<VoteOrder>> watchCampaignOrders(String campaignId) {
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
     return _voteOrders
+        .where('ownerId', isEqualTo: uid)
         .where('campaignId', isEqualTo: campaignId)
         .snapshots()
         .map((snap) =>

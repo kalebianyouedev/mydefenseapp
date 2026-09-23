@@ -38,6 +38,12 @@ class OrderService {
 
   String? get _uid => AuthService.instance.currentUser?.uid;
 
+  // Toutes les requêtes sur `orders`, `tickets`, `voteOrders` et
+  // `withdrawals` doivent filtrer sur `buyerId` ou `ownerId` : les règles
+  // Firestore refusent sinon la requête en ligne (le cache hors ligne,
+  // lui, ne vérifie pas les règles, d'où des données qui n'apparaissent
+  // que sans connexion).
+
   /// Crée la commande en statut "pending". Ne touche à aucun stock : le
   /// stock n'est décrémenté qu'à la confirmation, pour ne jamais bloquer
   /// des billets sur une commande jamais payée.
@@ -100,6 +106,7 @@ class OrderService {
         // Déjà confirmée : renvoie les billets existants plutôt que d'en
         // regénérer (double-tap sur "Confirmer").
         final existing = await _tickets
+            .where('buyerId', isEqualTo: order.buyerId)
             .where('orderId', isEqualTo: orderId)
             .get();
         return existing.docs
@@ -209,31 +216,43 @@ class OrderService {
         .handleError((_) => null);
   }
 
+  /// Billets d'une commande de l'utilisateur courant (QR codes).
   Stream<List<Ticket>> watchOrderTickets(String orderId) {
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
     return _tickets
+        .where('buyerId', isEqualTo: uid)
         .where('orderId', isEqualTo: orderId)
         .snapshots()
         .map((snap) =>
-            snap.docs.map((d) => Ticket.fromMap(d.id, d.data())).toList())
-        .handleError((_) => <Ticket>[]);
+            snap.docs.map((d) => Ticket.fromMap(d.id, d.data())).toList());
   }
 
   /// Billets vendus pour un événement (table "Billets & Vérification" du
   /// tableau de bord organisateur).
   Stream<List<Ticket>> watchEventTickets(String eventId) {
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
+    // Tri côté app : évite un index composite supplémentaire.
     return _tickets
+        .where('ownerId', isEqualTo: uid)
         .where('eventId', isEqualTo: eventId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => Ticket.fromMap(d.id, d.data())).toList())
+        .map((snap) => snap.docs
+            .map((d) => Ticket.fromMap(d.id, d.data()))
+            .toList()
+          ..sort((a, b) => (b.createdAt ?? DateTime(0))
+              .compareTo(a.createdAt ?? DateTime(0))))
         .handleError((_) => <Ticket>[]);
   }
 
   /// Commandes confirmées d'un événement, pour la vue financière du
   /// tableau de bord organisateur.
   Stream<List<TicketOrder>> watchEventOrders(String eventId) {
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
     return _orders
+        .where('ownerId', isEqualTo: uid)
         .where('eventId', isEqualTo: eventId)
         .snapshots()
         .map((snap) =>
@@ -241,8 +260,15 @@ class OrderService {
         .handleError((_) => <TicketOrder>[]);
   }
 
+  /// Recherche un billet de l'événement par son code (scan à l'entrée).
+  /// Le filtre `ownerId` est obligatoire : les règles Firestore ne
+  /// laissent l'organisateur lire que les billets de ses événements, et
+  /// refusent toute requête qui ne le garantit pas.
   Future<Ticket?> findTicketByCode(String eventId, String code) async {
+    final uid = _uid;
+    if (uid == null) throw StateError('Utilisateur non connecté.');
     final snap = await _tickets
+        .where('ownerId', isEqualTo: uid)
         .where('eventId', isEqualTo: eventId)
         .where('code', isEqualTo: code.trim().toUpperCase())
         .limit(1)

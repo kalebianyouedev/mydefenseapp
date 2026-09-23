@@ -77,19 +77,19 @@ class WalletService {
 
   String? get _uid => AuthService.instance.currentUser?.uid;
 
-  /// Exécute une requête et renvoie ses documents, ou une liste vide si
-  /// elle échoue (permission refusée sur un vieux document sans
-  /// `ownerId`, index en cours de construction, réseau...). Le
-  /// portefeuille reste ainsi une estimation qui s'affiche toujours,
-  /// plutôt qu'un tout-ou-rien qui casse sur la moindre donnée isolée.
+  // Toutes les requêtes sur `orders`, `tickets`, `voteOrders` et
+  // `withdrawals` doivent filtrer sur `buyerId` ou `ownerId` : les règles
+  // Firestore refusent sinon la requête en ligne (le cache hors ligne,
+  // lui, ne vérifie pas les règles, d'où des données qui n'apparaissent
+  // que sans connexion).
+
+  /// Exécute une requête et renvoie ses documents. Une erreur remonte à
+  /// l'écran (message + "Réessayer") au lieu d'être masquée : mieux vaut
+  /// signaler un échec que d'afficher un faux solde de 0 FCFA.
   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _safeDocs(
       Query<Map<String, dynamic>> query) async {
-    try {
-      final snap = await query.get().timeout(_timeout);
-      return snap.docs;
-    } catch (_) {
-      return const [];
-    }
+    final snap = await query.get().timeout(_timeout);
+    return snap.docs;
   }
 
   /// Additionne les commandes confirmées de tous les événements de
@@ -101,7 +101,10 @@ class WalletService {
 
     num gross = 0;
     final ordersDocsList = await Future.wait(eventDocs.map(
-      (eventDoc) => _safeDocs(_db.collection('orders').where('eventId', isEqualTo: eventDoc.id)),
+      (eventDoc) => _safeDocs(_db
+          .collection('orders')
+          .where('ownerId', isEqualTo: _uid)
+          .where('eventId', isEqualTo: eventDoc.id)),
     ));
     for (final orderDocs in ordersDocsList) {
       for (final orderDoc in orderDocs) {
@@ -115,7 +118,10 @@ class WalletService {
     // Recettes des campagnes de vote de l'organisation (achats de votes
     // confirmés), qui comptent pour le même solde.
     final voteOrderDocs = await _safeDocs(
-        _db.collection('voteOrders').where('organisationId', isEqualTo: organisationId));
+        _db
+            .collection('voteOrders')
+            .where('ownerId', isEqualTo: _uid)
+            .where('organisationId', isEqualTo: organisationId));
     for (final doc in voteOrderDocs) {
       final order = VoteOrder.fromMap(doc.id, doc.data());
       if (order.status == VoteOrderStatus.confirmed) {
@@ -124,7 +130,9 @@ class WalletService {
     }
 
     final withdrawalDocs =
-        await _safeDocs(_withdrawals.where('organisationId', isEqualTo: organisationId));
+        await _safeDocs(_withdrawals
+            .where('ownerId', isEqualTo: _uid)
+            .where('organisationId', isEqualTo: organisationId));
     num withdrawn = 0;
     num pending = 0;
     for (final doc in withdrawalDocs) {
@@ -160,7 +168,10 @@ class WalletService {
     final eventDocs = await _safeDocs(
         _db.collection('events').where('organisationId', isEqualTo: organisationId));
     final ordersDocsList = await Future.wait(eventDocs.map(
-      (eventDoc) => _safeDocs(_db.collection('orders').where('eventId', isEqualTo: eventDoc.id)),
+      (eventDoc) => _safeDocs(_db
+          .collection('orders')
+          .where('ownerId', isEqualTo: _uid)
+          .where('eventId', isEqualTo: eventDoc.id)),
     ));
     for (var i = 0; i < eventDocs.length; i++) {
       final eventTitle = eventDocs[i].data()['title'] as String? ?? '';
@@ -178,7 +189,10 @@ class WalletService {
     }
 
     final voteOrderDocs = await _safeDocs(
-        _db.collection('voteOrders').where('organisationId', isEqualTo: organisationId));
+        _db
+            .collection('voteOrders')
+            .where('ownerId', isEqualTo: _uid)
+            .where('organisationId', isEqualTo: organisationId));
     for (final doc in voteOrderDocs) {
       final order = VoteOrder.fromMap(doc.id, doc.data());
       if (order.status != VoteOrderStatus.confirmed) continue;
@@ -196,12 +210,16 @@ class WalletService {
   }
 
   Stream<List<Withdrawal>> watchWithdrawals(String organisationId) {
+    // Tri côté app : évite un index composite supplémentaire.
     return _withdrawals
+        .where('ownerId', isEqualTo: _uid)
         .where('organisationId', isEqualTo: organisationId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => Withdrawal.fromMap(d.id, d.data())).toList())
+        .map((snap) => snap.docs
+            .map((d) => Withdrawal.fromMap(d.id, d.data()))
+            .toList()
+          ..sort((a, b) => (b.createdAt ?? DateTime(0))
+              .compareTo(a.createdAt ?? DateTime(0))))
         .handleError((_) => <Withdrawal>[]);
   }
 

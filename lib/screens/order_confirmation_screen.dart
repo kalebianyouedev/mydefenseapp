@@ -7,14 +7,13 @@ import '../models/order.dart';
 import '../models/payment_method.dart';
 import '../models/ticket.dart';
 import '../services/order_service.dart';
-import '../services/ticket_pdf_service.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
 
 /// Suivi d'une commande : tant qu'aucune passerelle Orange Money / MTN
 /// Mobile Money réelle n'est branchée, le paiement est confirmé ici à
 /// la main (simulateur de l'accusé de réception mobile money). Une fois
-/// confirmée, les billets (avec QR code) apparaissent et peuvent être
-/// partagés en PDF.
+/// confirmée, les billets apparaissent avec leur QR code, à présenter à
+/// l'entrée (scanné une seule fois par l'organisateur).
 class OrderConfirmationScreen extends StatefulWidget {
   final String orderId;
 
@@ -26,7 +25,9 @@ class OrderConfirmationScreen extends StatefulWidget {
 
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   bool _confirming = false;
-  bool _sharing = false;
+
+  /// Change pour recréer le flux des billets (bouton "Réessayer").
+  int _ticketsAttempt = 0;
 
   Future<void> _confirmPayment() async {
     setState(() => _confirming = true);
@@ -38,17 +39,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       }
     } finally {
       if (mounted) setState(() => _confirming = false);
-    }
-  }
-
-  Future<void> _share(TicketOrder order, List<Ticket> tickets) async {
-    setState(() => _sharing = true);
-    try {
-      await TicketPdfService.instance.shareTickets(order: order, tickets: tickets);
-    } catch (e) {
-      if (mounted) showAuthSnack(context, 'Échec de la génération du PDF : $e');
-    } finally {
-      if (mounted) setState(() => _sharing = false);
     }
   }
 
@@ -80,14 +70,14 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               return _PendingView(order: order, confirming: _confirming, onConfirm: _confirmPayment);
             }
             return StreamBuilder<List<Ticket>>(
+              key: ValueKey(_ticketsAttempt),
               stream: OrderService.instance.watchOrderTickets(order.id),
               builder: (context, ticketSnap) {
-                final tickets = ticketSnap.data ?? const <Ticket>[];
                 return _ConfirmedView(
                   order: order,
-                  tickets: tickets,
-                  sharing: _sharing,
-                  onShare: tickets.isEmpty ? null : () => _share(order, tickets),
+                  tickets: ticketSnap.data,
+                  error: ticketSnap.hasError,
+                  onRetry: () => setState(() => _ticketsAttempt++),
                 );
               },
             );
@@ -153,11 +143,17 @@ class _PendingView extends StatelessWidget {
 
 class _ConfirmedView extends StatelessWidget {
   final TicketOrder order;
-  final List<Ticket> tickets;
-  final bool sharing;
-  final VoidCallback? onShare;
+  /// null tant que les billets chargent.
+  final List<Ticket>? tickets;
+  final bool error;
+  final VoidCallback onRetry;
 
-  const _ConfirmedView({required this.order, required this.tickets, required this.sharing, required this.onShare});
+  const _ConfirmedView({
+    required this.order,
+    required this.tickets,
+    required this.error,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -181,25 +177,25 @@ class _ConfirmedView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        for (final ticket in tickets) _TicketCard(ticket: ticket),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton.icon(
-            onPressed: sharing ? null : onShare,
-            icon: sharing
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Icon(Icons.picture_as_pdf_outlined, color: Colors.white),
-            label: Text('Partager les billets (PDF)', style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w600)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: authPrimary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          ),
-        ),
+        if (error)
+          _TicketsMessage(
+            icon: Icons.wifi_off_rounded,
+            text: 'Impossible de charger vos billets. Vérifiez votre connexion.',
+            onRetry: onRetry,
+          )
+        else if (tickets == null)
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator(color: authPrimary)),
+          )
+        else if (tickets!.isEmpty)
+          _TicketsMessage(
+            icon: Icons.confirmation_number_outlined,
+            text: 'Vos billets sont en cours de génération.',
+            onRetry: onRetry,
+          )
+        else
+          for (final ticket in tickets!) _TicketCard(ticket: ticket),
       ],
     );
   }
@@ -323,6 +319,8 @@ class _TicketCard extends StatelessWidget {
                   if (ticket.venue.isNotEmpty || ticket.city.isNotEmpty)
                     _infoRow(Icons.place_outlined,
                         [ticket.venue, ticket.city].where((e) => e.isNotEmpty).join(', ')),
+                  if (ticket.buyerName.isNotEmpty)
+                    _infoRow(Icons.person_outline, ticket.buyerName),
                   _infoRow(Icons.payments_outlined, '${fmt.format(ticket.price)} XAF'),
                 ],
               ),
@@ -342,7 +340,10 @@ class _TicketCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: authBorder),
                     ),
-                    child: QrImageView(data: ticket.code, size: 150, backgroundColor: Colors.white),
+                    child: Opacity(
+                      opacity: ticket.status == TicketStatus.valid ? 1 : 0.25,
+                      child: QrImageView(data: ticket.code, size: 200, backgroundColor: Colors.white),
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Text(
@@ -351,8 +352,18 @@ class _TicketCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Présentez ce QR code à l\'entrée',
-                    style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted),
+                    switch (ticket.status) {
+                      TicketStatus.valid => 'Présentez ce QR code à l\'entrée',
+                      TicketStatus.used => ticket.checkedInAt != null
+                          ? 'Billet scanné le ${DateFormat("d MMM 'à' HH'h'mm", 'fr_FR').format(ticket.checkedInAt!)}'
+                          : 'Billet déjà scanné',
+                      TicketStatus.cancelled => 'Billet annulé',
+                    },
+                    style: GoogleFonts.poppins(
+                      fontSize: 11.5,
+                      color: ticket.status == TicketStatus.valid ? authMuted : statusColor,
+                      fontWeight: ticket.status == TicketStatus.valid ? FontWeight.w400 : FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -381,6 +392,41 @@ class _TicketCard extends StatelessWidget {
             child: Text(
               text,
               style: GoogleFonts.poppins(fontSize: 13, color: authInk, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TicketsMessage extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final VoidCallback onRetry;
+
+  const _TicketsMessage({required this.icon, required this.text, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        children: [
+          Icon(icon, size: 36, color: authMuted),
+          const SizedBox(height: 10),
+          Text(text,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 13.5, color: authInk)),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: Text('Réessayer', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: authPrimary,
+              side: const BorderSide(color: authPrimary),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
           ),
         ],

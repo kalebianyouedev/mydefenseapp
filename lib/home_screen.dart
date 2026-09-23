@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'models/event.dart';
 import 'models/organisation.dart';
 import 'screens/account_screen.dart';
+import 'screens/ai_assistant_screen.dart';
 import 'screens/event_detail_screen.dart';
 import 'screens/my_orders_screen.dart';
 import 'screens/organisation_hub_screen.dart';
@@ -41,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _ => const SizedBox.shrink(),
         },
       ),
+      floatingActionButton: const _AiAssistantFab(),
       bottomNavigationBar: LiquidGlassNavBar(
         currentIndex: _navIndex,
         onTap: (index) {
@@ -51,6 +53,28 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
+    );
+  }
+}
+
+/// Bouton flottant de l'assistant IA (recommandations d'événements),
+/// accessible depuis tous les onglets de l'accueil.
+class _AiAssistantFab extends StatelessWidget {
+  const _AiAssistantFab();
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'ai-assistant',
+      tooltip: 'Assistant IA',
+      backgroundColor: authPrimary,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: const CircleBorder(),
+      onPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AiAssistantScreen()),
+      ),
+      child: const Icon(Icons.auto_awesome),
     );
   }
 }

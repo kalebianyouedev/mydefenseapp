@@ -90,7 +90,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           const Icon(Icons.error_outline, color: authPrimary, size: 18),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text('Échec du chargement : $error',
+                            child: Text('Impossible de charger le solde. Vérifiez votre connexion puis réessayez.',
                                 style: GoogleFonts.poppins(fontSize: 12, color: authInk)),
                           ),
                           TextButton(
@@ -104,7 +104,9 @@ class _WalletScreenState extends State<WalletScreen> {
                     organisation: widget.organisation,
                     summary: summary,
                     loading: loading,
-                    onWithdraw: loading ? null : () => _openWithdrawSheet(summary),
+                    onWithdraw: loading || error != null
+                        ? null
+                        : () => _openWithdrawSheet(summary),
                   ),
                   const SizedBox(height: 26),
                   Text('Toutes les transactions',

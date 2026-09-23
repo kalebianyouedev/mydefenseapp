@@ -8,8 +8,8 @@ import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted, auth
 import 'order_confirmation_screen.dart';
 
 /// Mes commandes : historique des billets achetés (en attente ou
-/// confirmés), avec accès au PDF. Onglet "Orders" de la navigation
-/// principale.
+/// confirmés). Une commande confirmée affiche le QR code de chaque billet.
+/// Onglet "Orders" de la navigation principale.
 class MyOrdersScreen extends StatelessWidget {
   const MyOrdersScreen({super.key});
 
@@ -110,13 +110,14 @@ class _OrderTile extends StatelessWidget {
                         style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                     const SizedBox(height: 3),
                     Text(
-                      '${order.ticketCount} billet${order.ticketCount > 1 ? 's' : ''} · ${fmt.format(order.totalAmount)} XAF · ${confirmed ? 'Confirmée' : 'En attente'}',
+                      '${order.ticketCount} billet${order.ticketCount > 1 ? 's' : ''} · ${fmt.format(order.totalAmount)} XAF · ${confirmed ? 'Voir le QR code' : 'En attente'}',
                       style: GoogleFonts.poppins(fontSize: 12, color: authMuted),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: authMuted),
+              Icon(confirmed ? Icons.qr_code_2 : Icons.chevron_right,
+                  color: confirmed ? authInk : authMuted),
             ],
           ),
         ),

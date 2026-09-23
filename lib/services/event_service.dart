@@ -76,6 +76,17 @@ class EventService {
         .handleError((_) => null);
   }
 
+  /// Version ponctuelle de [watchPublished], pour l'assistant IA.
+  Future<List<Event>> fetchPublished() async {
+    final snap = await _events
+        .where('status', isEqualTo: 'published')
+        .orderBy('createdAt', descending: true)
+        .limit(100)
+        .get()
+        .timeout(_timeout);
+    return snap.docs.map((d) => Event.fromMap(d.id, d.data())).toList();
+  }
+
   Future<Event?> fetchOne(String eventId) async {
     final snap = await _events.doc(eventId).get().timeout(_timeout);
     if (!snap.exists) return null;
@@ -232,6 +243,18 @@ class EventService {
   Future<List<TicketType>> fetchTicketTypes(String eventId) async {
     final snap = await _ticketTypes(eventId).get().timeout(_timeout);
     return snap.docs.map((d) => TicketType.fromMap(d.id, d.data())).toList();
+  }
+
+  /// Prix du billet le moins cher (null si aucun billet ou erreur).
+  /// Utilisé par l'assistant IA pour filtrer selon le budget.
+  Future<num?> fetchMinPrice(String eventId) async {
+    try {
+      final types = await fetchTicketTypes(eventId);
+      if (types.isEmpty) return null;
+      return types.map((t) => t.price).reduce((a, b) => a < b ? a : b);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> addTicketType({

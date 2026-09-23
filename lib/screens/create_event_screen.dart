@@ -7,7 +7,9 @@ import 'package:intl/intl.dart';
 
 import '../models/event.dart';
 import '../models/organisation.dart';
+import '../services/ai_service.dart';
 import '../services/event_service.dart';
+import '../widgets/ai_generate_button.dart';
 import '../services/stockimg_client.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
@@ -563,7 +565,25 @@ class _InformationsStep extends StatelessWidget {
         _fieldLabel('Titre'),
         TextField(controller: titleCtrl, style: GoogleFonts.poppins(fontSize: 14), decoration: _fieldDecoration('Festival Urbain de Douala')),
         const SizedBox(height: 16),
-        _fieldLabel('Description'),
+        Row(
+          children: [
+            Expanded(child: _fieldLabel('Description')),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: AiGenerateButton(
+                controller: descriptionCtrl,
+                validate: () => titleCtrl.text.trim().isEmpty ? "Renseignez d'abord le titre de l'événement." : null,
+                generate: (instructions) => AiService.instance.generateEventDescription(
+                  title: titleCtrl.text.trim(),
+                  venue: venueCtrl.text,
+                  city: cityCtrl.text,
+                  existing: descriptionCtrl.text,
+                  instructions: instructions,
+                ),
+              ),
+            ),
+          ],
+        ),
         TextField(
           controller: descriptionCtrl,
           maxLines: 5,
