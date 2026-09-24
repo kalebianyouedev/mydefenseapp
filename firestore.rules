@@ -2,9 +2,83 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------
+    // Fonctions communes
+    // ------------------------------------------------------------------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Administrateur : document admins/{uid} (créé depuis la console
+    // Firebase ou par un autre administrateur).
+    function isAdmin() {
+      return signedIn() &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Compte bloqué/supprimé par un administrateur : plus aucune création.
+    function isBlockedUser() {
+      return exists(/databases/$(database)/documents/userModeration/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/userModeration/$(request.auth.uid)).data.get('blocked', false) == true;
+    }
+
+    function active() {
+      return signedIn() && !isBlockedUser();
+    }
+
+    function org(id) {
+      return get(/databases/$(database)/documents/organisations/$(id)).data;
+    }
+
+    // Organisation appartenant à l'utilisateur et non bloquée.
+    function ownsUsableOrg(id) {
+      return org(id).ownerId == request.auth.uid &&
+             org(id).get('blocked', false) != true;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ------------------------------------------------------------------
+    // Administration
+    // ------------------------------------------------------------------
+
+    match /admins/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Blocage / suppression d'un compte (lu par l'app au démarrage).
+    match /userModeration/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Journal des actions des administrateurs.
+    match /adminLogs/{logId} {
+      allow read, create: if isAdmin();
+    }
+
+    // Compteur séquentiel des demandes de retrait (RET-000001, ...).
+    match /counters/withdrawals {
+      allow read: if signedIn();
+      allow create: if active() && request.resource.data.next == 2;
+      allow update: if isAdmin() ||
+                       (active() && request.resource.data.next == resource.data.next + 1);
+    }
+
+    // ------------------------------------------------------------------
+    // Utilisateurs
+    // ------------------------------------------------------------------
+
     // Profil utilisateur + sous-collections privées/liées.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if signedIn() && request.auth.uid == userId;
+      allow update, delete: if isAdmin();
 
       // Publications sauvegardées par l'utilisateur (miroir de posts/{id}/saves).
       match /saves/{postId} {
@@ -22,19 +96,41 @@ service cloud.firestore {
         allow read: if request.auth != null;
         allow write: if request.auth != null && request.auth.uid == followerId;
       }
+
+      // Événements aimés (favoris) — miroir de events/{id}/likes.
+      match /likedEvents/{eventId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Organisations suivies — miroir de organisations/{id}/followers.
+      match /followedOrganisations/{organisationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Notifications envoyées par l'administrateur (temps réel dans
+      // l'app). L'utilisateur peut seulement les marquer lues/supprimer.
+      match /notifications/{notificationId} {
+        allow read, delete: if signedIn() && request.auth.uid == userId;
+        allow update: if signedIn() && request.auth.uid == userId &&
+                         changedKeys().hasOnly(['read']);
+        allow create: if isAdmin();
+      }
     }
 
-    // Fil "Posts" (photo/vidéo façon reels).
+    // ------------------------------------------------------------------
+    // Fil "Posts" (photo/vidéo façon reels)
+    // ------------------------------------------------------------------
+
     match /posts/{postId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null &&
+      allow create: if active() &&
                        request.resource.data.authorId == request.auth.uid;
       // Mise à jour : l'auteur (édition) ou n'importe quel utilisateur
       // connecté pour les compteurs (like/commentaire/sauvegarde/partage/
       // republication), gérés via transaction côté client.
       allow update: if request.auth != null;
-      allow delete: if request.auth != null &&
-                       resource.data.authorId == request.auth.uid;
+      allow delete: if isAdmin() ||
+                       (request.auth != null && resource.data.authorId == request.auth.uid);
 
       match /likes/{uid} {
         allow read: if request.auth != null;
@@ -53,29 +149,73 @@ service cloud.firestore {
 
       match /comments/{commentId} {
         allow read: if request.auth != null;
-        allow create: if request.auth != null &&
+        allow create: if active() &&
                          request.resource.data.authorId == request.auth.uid;
-        allow update, delete: if request.auth != null &&
-                         resource.data.authorId == request.auth.uid;
+        allow update, delete: if isAdmin() ||
+                         (request.auth != null && resource.data.authorId == request.auth.uid);
       }
     }
 
-    // Organisations créées par l'utilisateur (requis avant de publier).
+    // ------------------------------------------------------------------
+    // Organisations
+    // ------------------------------------------------------------------
+
+    // `certified` et `blocked` ne sont modifiables que par un
+    // administrateur : une organisation naît non certifiée et non bloquée.
     match /organisations/{organisationId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null &&
-                       request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null &&
-                       resource.data.ownerId == request.auth.uid;
+      allow create: if active() &&
+                       request.resource.data.ownerId == request.auth.uid &&
+                       request.resource.data.get('certified', false) == false &&
+                       request.resource.data.get('blocked', false) == false;
+      // Le propriétaire modifie ses infos (et peut demander la
+      // certification) sans toucher aux champs d'administration ;
+      // n'importe quel utilisateur connecté peut ajuster le compteur
+      // d'abonnés (transaction d'abonnement).
+      allow update: if isAdmin() ||
+                       (request.auth != null &&
+                        resource.data.ownerId == request.auth.uid &&
+                        !changedKeys().hasAny(['certified', 'certifiedAt', 'blocked', 'blockedReason', 'blockedAt'])) ||
+                       (request.auth != null && changedKeys().hasOnly(['followerCount']));
+      allow delete: if isAdmin() ||
+                       (request.auth != null && resource.data.ownerId == request.auth.uid);
+
+      match /followers/{uid} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
     }
 
-    // Événements créés par une organisation (billetterie).
+    // ------------------------------------------------------------------
+    // Événements (billetterie)
+    // ------------------------------------------------------------------
+
     match /events/{eventId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null &&
-                       request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null &&
-                       resource.data.ownerId == request.auth.uid;
+      // Création : organisation de l'utilisateur, non bloquée ; le badge
+      // "certifié" recopié doit correspondre à l'organisation.
+      allow create: if active() &&
+                       request.resource.data.ownerId == request.auth.uid &&
+                       ownsUsableOrg(request.resource.data.organisationId) &&
+                       request.resource.data.get('hiddenByAdmin', false) == false &&
+                       request.resource.data.get('organisationCertified', false) ==
+                         org(request.resource.data.organisationId).get('certified', false);
+      // Le propriétaire modifie tout sauf les champs d'administration ;
+      // le public peut seulement faire évoluer les compteurs (vues,
+      // j'aime, boosts) ; l'administrateur peut tout modifier.
+      allow update: if isAdmin() ||
+                       (request.auth != null &&
+                        resource.data.ownerId == request.auth.uid &&
+                        !changedKeys().hasAny(['hiddenByAdmin', 'organisationCertified'])) ||
+                       (request.auth != null &&
+                        changedKeys().hasOnly(['views', 'likeCount', 'boosts', 'boostAmount']));
+      allow delete: if isAdmin() ||
+                       (request.auth != null && resource.data.ownerId == request.auth.uid);
+
+      match /likes/{uid} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
 
       // Types de billets : lecture publique (prix affichés au public).
       // Création/suppression/modification des champs (nom, prix,
@@ -107,13 +247,25 @@ service cloud.firestore {
       }
     }
 
+    // ------------------------------------------------------------------
+    // Votes
+    // ------------------------------------------------------------------
+
     // Campagnes de vote payant d'une organisation.
     match /voteCampaigns/{campaignId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null &&
-                       request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null &&
-                       resource.data.ownerId == request.auth.uid;
+      allow create: if active() &&
+                       request.resource.data.ownerId == request.auth.uid &&
+                       ownsUsableOrg(request.resource.data.organisationId) &&
+                       request.resource.data.get('hiddenByAdmin', false) == false &&
+                       request.resource.data.get('organisationCertified', false) ==
+                         org(request.resource.data.organisationId).get('certified', false);
+      allow update: if isAdmin() ||
+                       (request.auth != null &&
+                        resource.data.ownerId == request.auth.uid &&
+                        !changedKeys().hasAny(['hiddenByAdmin', 'organisationCertified']));
+      allow delete: if isAdmin() ||
+                       (request.auth != null && resource.data.ownerId == request.auth.uid);
 
       // Catégories : lecture publique (prix par vote affiché), gestion
       // réservée au propriétaire de la campagne.
@@ -144,24 +296,57 @@ service cloud.firestore {
     // est dupliqué sur la commande pour éviter un get() imbriqué dans
     // les règles — plus robuste si la campagne est supprimée ensuite.
     match /voteOrders/{orderId} {
-      allow read: if request.auth != null &&
-                     (resource.data.buyerId == request.auth.uid ||
-                      resource.data.ownerId == request.auth.uid);
-      allow create: if request.auth != null &&
+      allow read: if isAdmin() ||
+                     (request.auth != null &&
+                      (resource.data.buyerId == request.auth.uid ||
+                       resource.data.ownerId == request.auth.uid));
+      allow create: if active() &&
                        request.resource.data.buyerId == request.auth.uid;
       allow update: if request.auth != null &&
                        resource.data.buyerId == request.auth.uid;
     }
 
+    // ------------------------------------------------------------------
+    // Argent : boosts, retraits, commandes, billets
+    // ------------------------------------------------------------------
+
+    // Boosts d'événements (paiement Mobile Money simulé, 100 F minimum).
+    match /eventBoosts/{boostId} {
+      allow read: if isAdmin() ||
+                     (request.auth != null &&
+                      (resource.data.buyerId == request.auth.uid ||
+                       resource.data.ownerId == request.auth.uid));
+      allow create: if active() &&
+                       request.resource.data.buyerId == request.auth.uid &&
+                       request.resource.data.amount >= 100;
+    }
+
     // Demandes de retrait des gains d'une organisation (Mobile Money).
-    // Aucune passerelle de paiement sortant réelle n'est branchée : une
-    // demande reste "en attente" jusqu'à un traitement manuel côté équipe.
+    // Seule une organisation certifiée et non bloquée peut en créer ;
+    // chaque demande porte le numéro séquentiel suivant du compteur
+    // `counters/withdrawals`. L'administrateur la fait avancer
+    // (pending -> approved -> paid, ou rejected) ; le propriétaire peut
+    // seulement l'annuler tant qu'elle est en attente. Aucune passerelle
+    // de paiement sortant n'est branchée : l'admin paie manuellement.
     match /withdrawals/{withdrawalId} {
-      allow read: if request.auth != null && resource.data.ownerId == request.auth.uid;
-      allow create: if request.auth != null &&
-                       request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null &&
-                       resource.data.ownerId == request.auth.uid;
+      allow read: if isAdmin() ||
+                     (request.auth != null && resource.data.ownerId == request.auth.uid);
+      allow create: if active() &&
+                       request.resource.data.ownerId == request.auth.uid &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.amount > 0 &&
+                       org(request.resource.data.organisationId).ownerId == request.auth.uid &&
+                       org(request.resource.data.organisationId).get('certified', false) == true &&
+                       org(request.resource.data.organisationId).get('blocked', false) != true &&
+                       getAfter(/databases/$(database)/documents/counters/withdrawals).data.next ==
+                         request.resource.data.number + 1;
+      allow update: if isAdmin() ||
+                       (request.auth != null &&
+                        resource.data.ownerId == request.auth.uid &&
+                        resource.data.status == 'pending' &&
+                        request.resource.data.status == 'cancelled' &&
+                        changedKeys().hasOnly(['status', 'cancelledAt']));
+      allow delete: if isAdmin();
     }
 
     // Commandes de billets (Orange Money / MTN Mobile Money simulés). Le
@@ -171,10 +356,11 @@ service cloud.firestore {
     // c'est ce qui permet au portefeuille de l'organisation de lire
     // toutes ses commandes sans crainte de permission-denied.
     match /orders/{orderId} {
-      allow read: if request.auth != null &&
-                     (resource.data.buyerId == request.auth.uid ||
-                      resource.data.ownerId == request.auth.uid);
-      allow create: if request.auth != null &&
+      allow read: if isAdmin() ||
+                     (request.auth != null &&
+                      (resource.data.buyerId == request.auth.uid ||
+                       resource.data.ownerId == request.auth.uid));
+      allow create: if active() &&
                        request.resource.data.buyerId == request.auth.uid;
       // Confirmation du paiement (pending -> confirmed) par l'acheteur
       // lui-même : aucune passerelle serveur n'est branchée.
@@ -184,9 +370,10 @@ service cloud.firestore {
 
     // Billets individuels, générés à la confirmation d'une commande.
     match /tickets/{ticketId} {
-      allow read: if request.auth != null &&
-                     (resource.data.buyerId == request.auth.uid ||
-                      resource.data.ownerId == request.auth.uid);
+      allow read: if isAdmin() ||
+                     (request.auth != null &&
+                      (resource.data.buyerId == request.auth.uid ||
+                       resource.data.ownerId == request.auth.uid));
       allow create: if request.auth != null &&
                        request.resource.data.buyerId == request.auth.uid;
       // Check-in à l'entrée : réservé au propriétaire de l'événement.

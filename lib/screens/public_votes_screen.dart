@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/vote_campaign.dart';
 import '../services/vote_service.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted, authBorder;
+import '../widgets/event_cover.dart';
 import 'public_vote_campaign_screen.dart';
 
 /// Fil public des campagnes de vote actives, toutes organisations
@@ -20,7 +21,7 @@ class PublicVotesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Votes en ligne', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text('Votes en ligne', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
       ),
       body: SafeArea(
         child: StreamBuilder<List<VoteCampaign>>(
@@ -44,10 +45,10 @@ class PublicVotesScreen extends StatelessWidget {
                         child: const Icon(Icons.how_to_vote_outlined, size: 36, color: authMuted),
                       ),
                       const SizedBox(height: 18),
-                      Text('Aucun vote en cours', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+                      Text('Aucun vote en cours', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
                       const SizedBox(height: 6),
                       Text('Revenez plus tard pour voter pour vos favoris.',
-                          textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                          textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                     ],
                   ),
                 ),
@@ -88,21 +89,15 @@ class _CampaignCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 130,
+                height: 230,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: authInk,
-                        image: campaign.coverImageUrl != null
-                            ? DecorationImage(image: NetworkImage(campaign.coverImageUrl!), fit: BoxFit.cover)
-                            : null,
-                      ),
-                      child: campaign.coverImageUrl == null
-                          ? const Center(child: Icon(Icons.emoji_events_outlined, size: 40, color: Colors.white70))
-                          : null,
+                    EventCover(
+                      imageUrl: campaign.coverImageUrl,
+                      fallbackIcon: Icons.emoji_events_outlined,
+                      fallbackIconSize: 40,
                     ),
                     Positioned(
                       left: 10,
@@ -110,8 +105,17 @@ class _CampaignCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(color: Colors.white.withOpacity(0.92), borderRadius: BorderRadius.circular(20)),
-                        child: Text(campaign.organisationName,
-                            style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: authInk)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(campaign.organisationName,
+                                style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w600, color: authInk)),
+                            if (campaign.organisationCertified) ...[
+                              const SizedBox(width: 3),
+                              const Icon(Icons.verified, size: 13, color: Color(0xFF2D6BE0)),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -122,7 +126,7 @@ class _CampaignCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(campaign.title, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
+                    Text(campaign.title, style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
                     if (campaign.endsAt != null) ...[
                       const SizedBox(height: 6),
                       Row(
@@ -130,7 +134,7 @@ class _CampaignCard extends StatelessWidget {
                           const Icon(Icons.timer_outlined, size: 14, color: authMuted),
                           const SizedBox(width: 6),
                           Text('Fin le ${DateFormat('d MMM y', 'fr_FR').format(campaign.endsAt!)}',
-                              style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                              style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                         ],
                       ),
                     ],

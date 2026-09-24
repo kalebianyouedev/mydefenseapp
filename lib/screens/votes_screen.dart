@@ -26,7 +26,7 @@ class VotesScreen extends StatelessWidget {
         elevation: 0,
         foregroundColor: authInk,
         title: Text('Votes — ${organisation.name}',
-            style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
+            style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
@@ -41,7 +41,7 @@ class VotesScreen extends StatelessWidget {
         },
         backgroundColor: authPrimary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Nouvelle campagne', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white)),
+        label: Text('Nouvelle campagne', style: GoogleFonts.nunito(fontWeight: FontWeight.w600, color: Colors.white)),
       ),
       body: SafeArea(
         child: StreamBuilder<List<VoteCampaign>>(
@@ -65,10 +65,10 @@ class VotesScreen extends StatelessWidget {
                         child: const Icon(Icons.emoji_events_outlined, size: 36, color: authMuted),
                       ),
                       const SizedBox(height: 18),
-                      Text('Aucune campagne de vote', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+                      Text('Aucune campagne de vote', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
                       const SizedBox(height: 6),
                       Text('Créez votre première campagne avec le bouton ci-dessous.',
-                          textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                          textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                     ],
                   ),
                 ),
@@ -137,15 +137,15 @@ class _CampaignTile extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
-                      child: Text(label, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
+                      child: Text(label, style: GoogleFonts.nunito(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
                     ),
                     const SizedBox(height: 6),
                     Text(campaign.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                        style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                     if (campaign.endsAt != null) ...[
                       const SizedBox(height: 3),
                       Text('Fin le ${DateFormat('d MMM y', 'fr_FR').format(campaign.endsAt!)}',
-                          style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                          style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                     ],
                   ],
                 ),

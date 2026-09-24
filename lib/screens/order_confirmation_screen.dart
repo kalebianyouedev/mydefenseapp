@@ -50,11 +50,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Votre commande', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text('Votre commande', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-            child: Text('Accueil', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authMuted)),
+            child: Text('Accueil', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authMuted)),
           ),
         ],
       ),
@@ -110,13 +110,13 @@ class _PendingView extends StatelessWidget {
             child: const Icon(Icons.phone_iphone, size: 40, color: authPrimary),
           ),
           const SizedBox(height: 22),
-          Text('Demande de paiement envoyée', textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Demande de paiement envoyée', textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 10),
           Text(
             'Une demande de ${fmt.format(order.totalAmount)} XAF a été envoyée par ${paymentMethodLabel(order.paymentMethod)} au ${order.paymentPhone}. '
             'Validez-la sur votre téléphone, puis confirmez ci-dessous.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted, height: 1.5),
+            style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted, height: 1.5),
           ),
           const SizedBox(height: 30),
           SizedBox(
@@ -132,7 +132,7 @@ class _PendingView extends StatelessWidget {
               ),
               child: confirming
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                  : Text('J\'ai validé le paiement', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
+                  : Text('J\'ai validé le paiement', style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -170,9 +170,9 @@ class _ConfirmedView extends StatelessWidget {
                 child: const Icon(Icons.check_circle, size: 42, color: Color(0xFF1E9E6B)),
               ),
               const SizedBox(height: 16),
-              Text('Paiement confirmé', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
+              Text('Paiement confirmé', style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
               const SizedBox(height: 6),
-              Text(order.eventTitle, style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted)),
+              Text(order.eventTitle, style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted)),
             ],
           ),
         ),
@@ -279,7 +279,7 @@ class _TicketCard extends StatelessWidget {
                       ),
                       child: Text(
                         _statusLabels[ticket.status]!,
-                        style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                        style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
                       ),
                     ),
                   ),
@@ -294,12 +294,12 @@ class _TicketCard extends StatelessWidget {
                           ticket.eventTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
+                          style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           ticket.ticketTypeName,
-                          style: GoogleFonts.poppins(fontSize: 12.5, color: Colors.white70, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.nunito(fontSize: 12.5, color: Colors.white70, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -348,7 +348,7 @@ class _TicketCard extends StatelessWidget {
                   const SizedBox(height: 14),
                   Text(
                     ticket.code,
-                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 3, color: authInk),
+                    style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 3, color: authInk),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -359,7 +359,7 @@ class _TicketCard extends StatelessWidget {
                           : 'Billet déjà scanné',
                       TicketStatus.cancelled => 'Billet annulé',
                     },
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 11.5,
                       color: ticket.status == TicketStatus.valid ? authMuted : statusColor,
                       fontWeight: ticket.status == TicketStatus.valid ? FontWeight.w400 : FontWeight.w600,
@@ -391,7 +391,7 @@ class _TicketCard extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.poppins(fontSize: 13, color: authInk, fontWeight: FontWeight.w500),
+              style: GoogleFonts.nunito(fontSize: 13, color: authInk, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -417,12 +417,12 @@ class _TicketsMessage extends StatelessWidget {
           const SizedBox(height: 10),
           Text(text,
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 13.5, color: authInk)),
+              style: GoogleFonts.nunito(fontSize: 13.5, color: authInk)),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh, size: 18),
-            label: Text('Réessayer', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            label: Text('Réessayer', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
             style: OutlinedButton.styleFrom(
               foregroundColor: authPrimary,
               side: const BorderSide(color: authPrimary),

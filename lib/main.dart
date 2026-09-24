@@ -38,12 +38,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Where the party is',
+      title: 'Ça Bouge Où ?',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0B0B0F),
-        textTheme: GoogleFonts.interTextTheme(
+        textTheme: GoogleFonts.nunitoTextTheme(
           ThemeData(brightness: Brightness.dark).textTheme,
         ),
       ),

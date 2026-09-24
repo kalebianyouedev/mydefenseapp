@@ -107,7 +107,7 @@ class _AiGenerateButtonState extends State<AiGenerateButton> {
             : hasText
                 ? "Améliorer avec l'IA"
                 : "Générer avec l'IA",
-        style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600),
+        style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -161,7 +161,7 @@ class _InstructionsSheetState extends State<_InstructionsSheet> {
               const SizedBox(width: 8),
               Text(
                 widget.improving ? "Améliorer avec l'IA" : "Générer avec l'IA",
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                     fontSize: 17, fontWeight: FontWeight.w700, color: authInk),
               ),
             ],
@@ -170,7 +170,7 @@ class _InstructionsSheetState extends State<_InstructionsSheet> {
           Text(
             "Dites à l'IA ce que vous voulez : ton, informations à mettre en "
             'avant, format réseaux sociaux… (facultatif)',
-            style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted),
+            style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted),
           ),
           const SizedBox(height: 14),
           TextField(
@@ -178,11 +178,11 @@ class _InstructionsSheetState extends State<_InstructionsSheet> {
             autofocus: true,
             minLines: 2,
             maxLines: 5,
-            style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+            style: GoogleFonts.nunito(fontSize: 14, color: authInk),
             decoration: InputDecoration(
               hintText:
                   'Ex : mentionne le dress code tout en blanc et le DJ invité',
-              hintStyle: GoogleFonts.poppins(fontSize: 13, color: authMuted),
+              hintStyle: GoogleFonts.nunito(fontSize: 13, color: authMuted),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               border: OutlineInputBorder(
@@ -207,7 +207,7 @@ class _InstructionsSheetState extends State<_InstructionsSheet> {
               for (final example in _examples)
                 ActionChip(
                   label: Text(example,
-                      style: GoogleFonts.poppins(fontSize: 12, color: authInk)),
+                      style: GoogleFonts.nunito(fontSize: 12, color: authInk)),
                   backgroundColor: const Color(0xFFF4F4F6),
                   side: BorderSide.none,
                   onPressed: () => _addExample(example),
@@ -229,7 +229,7 @@ class _InstructionsSheetState extends State<_InstructionsSheet> {
               ),
               icon: const Icon(Icons.auto_awesome, size: 18),
               label: Text(widget.improving ? 'Améliorer' : 'Générer',
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
             ),
           ),
         ],

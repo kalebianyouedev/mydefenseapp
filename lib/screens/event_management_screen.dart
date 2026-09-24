@@ -159,10 +159,10 @@ class _EventManagementScreenState extends State<EventManagementScreen> {
                         _StatusBadge(status: event.status),
                         const SizedBox(height: 10),
                         Text(event.title,
-                            style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
+                            style: GoogleFonts.nunito(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
                         if (event.description.isNotEmpty) ...[
                           const SizedBox(height: 6),
-                          Text(event.description, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                          Text(event.description, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                         ],
                         const SizedBox(height: 16),
                         _ActionButtons(
@@ -187,9 +187,9 @@ class _EventManagementScreenState extends State<EventManagementScreen> {
                         _StatsGrid(event: event),
                         const SizedBox(height: 24),
                         Text('Vue financière',
-                            style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                            style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                         Text('Résumé des paiements confirmés pour cet événement.',
-                            style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                            style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                         const SizedBox(height: 12),
                         _PeriodSelector(value: _period, onChanged: (p) => setState(() => _period = p)),
                         const SizedBox(height: 14),
@@ -209,7 +209,7 @@ class _EventManagementScreenState extends State<EventManagementScreen> {
                         ),
                         const SizedBox(height: 24),
                         Text('Billets & vérification',
-                            style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                            style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                         const SizedBox(height: 12),
                         StreamBuilder<List<Ticket>>(
                           stream: OrderService.instance.watchEventTickets(event.id),
@@ -217,7 +217,7 @@ class _EventManagementScreenState extends State<EventManagementScreen> {
                             final tickets = ticketSnap.data ?? const <Ticket>[];
                             if (tickets.isEmpty) {
                               return Text('Aucun billet généré pour le moment.',
-                                  style: GoogleFonts.poppins(fontSize: 13, color: authMuted));
+                                  style: GoogleFonts.nunito(fontSize: 13, color: authMuted));
                             }
                             return Column(children: tickets.map((t) => _TicketRow(ticket: t)).toList());
                           },
@@ -322,7 +322,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: GoogleFonts.poppins(fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
+      child: Text(label, style: GoogleFonts.nunito(fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
     );
   }
 }
@@ -379,7 +379,7 @@ class _ActionButtons extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: onTap,
       icon: Icon(icon, size: 15, color: color),
-      label: Text(label, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+      label: Text(label, style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
       style: OutlinedButton.styleFrom(
         backgroundColor: background,
         side: BorderSide(color: danger || filled ? Colors.transparent : authBorder),
@@ -429,10 +429,10 @@ class _StatsGrid extends StatelessWidget {
                         Row(children: [
                           Icon(s.$3, size: 13, color: authMuted),
                           const SizedBox(width: 5),
-                          Text(s.$1, style: GoogleFonts.poppins(fontSize: 10.5, color: authMuted, fontWeight: FontWeight.w600)),
+                          Text(s.$1, style: GoogleFonts.nunito(fontSize: 10.5, color: authMuted, fontWeight: FontWeight.w600)),
                         ]),
                         const SizedBox(height: 4),
-                        Text(s.$2, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
+                        Text(s.$2, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
                       ],
                     ),
                   ))
@@ -477,7 +477,7 @@ class _PeriodSelector extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: active ? authInk : authBorder),
               ),
-              child: Text(_labels[period]!, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: active ? Colors.white : authMuted)),
+              child: Text(_labels[period]!, style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w600, color: active ? Colors.white : authMuted)),
             ),
           );
         },
@@ -518,9 +518,9 @@ class _FinancialGrid extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(c.$1.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9.5, fontWeight: FontWeight.w700, color: authMuted, letterSpacing: 0.4)),
+                    Text(c.$1.toUpperCase(), style: GoogleFonts.nunito(fontSize: 9.5, fontWeight: FontWeight.w700, color: authMuted, letterSpacing: 0.4)),
                     const SizedBox(height: 6),
-                    Text(c.$2, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
+                    Text(c.$2, style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
                   ],
                 ),
               ))
@@ -547,8 +547,8 @@ class _TicketRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(ticket.buyerName, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
-                Text(ticket.ticketTypeName, style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted)),
+                Text(ticket.buyerName, style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
+                Text(ticket.ticketTypeName, style: GoogleFonts.nunito(fontSize: 11.5, color: authMuted)),
               ],
             ),
           ),
@@ -560,7 +560,7 @@ class _TicketRow extends StatelessWidget {
             ),
             child: Text(
               checkedIn ? 'Scanné' : 'Valide',
-              style: GoogleFonts.poppins(fontSize: 10.5, fontWeight: FontWeight.w600, color: checkedIn ? const Color(0xFF1E9E6B) : authMuted),
+              style: GoogleFonts.nunito(fontSize: 10.5, fontWeight: FontWeight.w600, color: checkedIn ? const Color(0xFF1E9E6B) : authMuted),
             ),
           ),
         ],

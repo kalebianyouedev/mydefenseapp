@@ -222,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 delegate: SliverChildListDelegate([
                   Text(
                     'Informations personnelles',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: authInk,
@@ -272,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Entreprise',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: authInk,
@@ -314,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const SizedBox(width: 10),
                                 Text(
                                   'Enregistrer',
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -407,7 +407,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               imageProviderFromPath(_photoUrl) == null)
                           ? Text(
                               _initials(),
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w700,
                                 color: authPrimary,
@@ -441,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             right: 20,
             child: Text(
               'Mon profil',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: authInk,
@@ -490,11 +490,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+      style: GoogleFonts.nunito(fontSize: 14, color: authInk),
       cursorColor: authPrimary,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+        labelStyle: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
         prefixIcon: Icon(icon, size: 20, color: authMuted),
         contentPadding: const EdgeInsets.symmetric(vertical: 14),
         border: OutlineInputBorder(
@@ -522,10 +522,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: AbsorbPointer(
         child: TextFormField(
           controller: TextEditingController(text: formatted),
-          style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+          style: GoogleFonts.nunito(fontSize: 14, color: authInk),
           decoration: InputDecoration(
             labelText: 'Date de naissance',
-            labelStyle: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+            labelStyle: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
             prefixIcon: const Icon(Icons.cake_outlined,
                 size: 20, color: authMuted),
             suffixIcon: const Icon(Icons.calendar_today_outlined,

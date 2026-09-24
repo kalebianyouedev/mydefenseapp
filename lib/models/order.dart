@@ -106,6 +106,11 @@ class TicketOrder {
   final DateTime? createdAt;
   final DateTime? confirmedAt;
 
+  /// Masquée par l'acheteur dans "Mes commandes". La commande n'est pas
+  /// supprimée : elle reste comptée dans le portefeuille de l'organisateur
+  /// et les billets restent valides.
+  final bool hiddenByBuyer;
+
   const TicketOrder({
     required this.id,
     required this.eventId,
@@ -125,6 +130,7 @@ class TicketOrder {
     this.status = OrderStatus.pending,
     this.createdAt,
     this.confirmedAt,
+    this.hiddenByBuyer = false,
   });
 
   int get ticketCount => items.fold(0, (sum, i) => sum + i.quantity);
@@ -155,6 +161,7 @@ class TicketOrder {
       createdAt: rawCreatedAt is Timestamp ? rawCreatedAt.toDate() : null,
       confirmedAt:
           rawConfirmedAt is Timestamp ? rawConfirmedAt.toDate() : null,
+      hiddenByBuyer: map['hiddenByBuyer'] as bool? ?? false,
     );
   }
 

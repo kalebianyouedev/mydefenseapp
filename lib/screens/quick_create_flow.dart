@@ -67,10 +67,10 @@ class _QuickCreateSheet extends StatelessWidget {
             child: Container(width: 40, height: 4, decoration: BoxDecoration(color: authBorder, borderRadius: BorderRadius.circular(4))),
           ),
           const SizedBox(height: 18),
-          Text('Que voulez-vous publier ?', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Que voulez-vous publier ?', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 4),
           Text('Choisissez ensuite (ou créez) l\'organisation qui publie.',
-              style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
+              style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted)),
           const SizedBox(height: 20),
           _ChoiceTile(
             icon: Icons.event_outlined,
@@ -123,9 +123,9 @@ class _ChoiceTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w700, color: authInk)),
+                    Text(title, style: GoogleFonts.nunito(fontSize: 14.5, fontWeight: FontWeight.w700, color: authInk)),
                     const SizedBox(height: 2),
-                    Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                    Text(subtitle, style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                   ],
                 ),
               ),

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'event_category.dart';
+
 enum EventStatus { draft, published, cancelled }
 
 EventStatus _statusFromString(String? raw) {
@@ -82,6 +84,7 @@ class Event {
   final String description;
   final String venue;
   final String city;
+  final EventCategory category;
 
   final String? coverImageUrl;
   final String? videoUrl;
@@ -96,6 +99,19 @@ class Event {
   final EventStatus status;
   final int views;
   final int boosts;
+  final int likeCount;
+
+  /// Total (F CFA) payé pour booster l'événement : les plus boostés
+  /// remontent en tête du fil d'accueil.
+  final num boostAmount;
+
+  /// Copie de `organisations/{id}.certified` (badge vérifié), mise à
+  /// jour par l'administrateur.
+  final bool organisationCertified;
+
+  /// Masqué par l'administrateur (organisation bloquée ou contenu
+  /// modéré) : n'apparaît plus dans le fil public.
+  final bool hiddenByAdmin;
 
   final DateTime? createdAt;
   final DateTime? publishedAt;
@@ -110,6 +126,7 @@ class Event {
     this.description = '',
     this.venue = '',
     this.city = '',
+    this.category = EventCategory.autres,
     this.coverImageUrl,
     this.videoUrl,
     this.gallery = const [],
@@ -120,6 +137,10 @@ class Event {
     this.status = EventStatus.draft,
     this.views = 0,
     this.boosts = 0,
+    this.likeCount = 0,
+    this.boostAmount = 0,
+    this.organisationCertified = false,
+    this.hiddenByAdmin = false,
     this.createdAt,
     this.publishedAt,
   });
@@ -150,6 +171,7 @@ class Event {
       description: map['description'] as String? ?? '',
       venue: map['venue'] as String? ?? '',
       city: map['city'] as String? ?? '',
+      category: EventCategory.fromId(map['category'] as String?),
       coverImageUrl: map['coverImageUrl'] as String?,
       videoUrl: map['videoUrl'] as String?,
       gallery: (map['gallery'] as List<dynamic>? ?? const [])
@@ -164,6 +186,10 @@ class Event {
       status: _statusFromString(map['status'] as String?),
       views: (map['views'] as num?)?.toInt() ?? 0,
       boosts: (map['boosts'] as num?)?.toInt() ?? 0,
+      likeCount: (map['likeCount'] as num?)?.toInt() ?? 0,
+      boostAmount: map['boostAmount'] as num? ?? 0,
+      organisationCertified: map['organisationCertified'] as bool? ?? false,
+      hiddenByAdmin: map['hiddenByAdmin'] as bool? ?? false,
       createdAt: rawCreatedAt is Timestamp ? rawCreatedAt.toDate() : null,
       publishedAt:
           rawPublishedAt is Timestamp ? rawPublishedAt.toDate() : null,
@@ -180,6 +206,7 @@ class Event {
       'description': description,
       'venue': venue,
       'city': city,
+      'category': category.id,
       'coverImageUrl': coverImageUrl,
       'videoUrl': videoUrl,
       'gallery': gallery,
@@ -190,6 +217,10 @@ class Event {
       'status': _statusToString(status),
       'views': views,
       'boosts': boosts,
+      'likeCount': likeCount,
+      'boostAmount': boostAmount,
+      'organisationCertified': organisationCertified,
+      'hiddenByAdmin': hiddenByAdmin,
       'createdAt': FieldValue.serverTimestamp(),
       'publishedAt':
           status == EventStatus.published ? FieldValue.serverTimestamp() : null,

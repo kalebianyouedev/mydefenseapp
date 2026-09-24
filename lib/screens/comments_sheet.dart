@@ -77,7 +77,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
             const SizedBox(height: 14),
             Text(
               'Commentaires',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: authInk,
@@ -101,7 +101,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       child: Text(
                         'Aucun commentaire pour le moment.',
                         style:
-                            GoogleFonts.poppins(fontSize: 13, color: authMuted),
+                            GoogleFonts.nunito(fontSize: 13, color: authMuted),
                       ),
                     );
                   }
@@ -125,11 +125,11 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       controller: _controller,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _send(),
-                      style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+                      style: GoogleFonts.nunito(fontSize: 14, color: authInk),
                       decoration: InputDecoration(
                         hintText: 'Ajouter un commentaire...',
                         hintStyle:
-                            GoogleFonts.poppins(fontSize: 14, color: authMuted),
+                            GoogleFonts.nunito(fontSize: 14, color: authMuted),
                         filled: true,
                         fillColor: const Color(0xFFF4F4F6),
                         contentPadding: const EdgeInsets.symmetric(
@@ -189,7 +189,7 @@ class _CommentTile extends StatelessWidget {
                   comment.authorName.isNotEmpty
                       ? comment.authorName[0].toUpperCase()
                       : '?',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: authPrimary,
@@ -206,7 +206,7 @@ class _CommentTile extends StatelessWidget {
                 children: [
                   Text(
                     comment.authorName,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: authInk,
@@ -216,7 +216,7 @@ class _CommentTile extends StatelessWidget {
                   if (comment.createdAt != null)
                     Text(
                       DateFormat('dd/MM HH:mm').format(comment.createdAt!),
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           fontSize: 11, color: authMuted),
                     ),
                 ],
@@ -224,7 +224,7 @@ class _CommentTile extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 comment.text,
-                style: GoogleFonts.poppins(fontSize: 13.5, color: authInk),
+                style: GoogleFonts.nunito(fontSize: 13.5, color: authInk),
               ),
             ],
           ),

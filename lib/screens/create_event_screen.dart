@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../models/event.dart';
+import '../models/event_category.dart';
 import '../models/organisation.dart';
 import '../services/ai_service.dart';
 import '../services/event_service.dart';
@@ -70,6 +71,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   late final _descriptionCtrl = TextEditingController(text: widget.existing?.description ?? '');
   late final _venueCtrl = TextEditingController(text: widget.existing?.venue ?? '');
   late final _cityCtrl = TextEditingController(text: widget.existing?.city ?? '');
+  late EventCategory? _category = widget.existing?.category;
 
   // Step 2
   late final List<_SeanceDraft> _seances = widget.existing == null || widget.existing!.seances.isEmpty
@@ -114,6 +116,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       case 0:
         if (_titleCtrl.text.trim().isEmpty) {
           showAuthSnack(context, 'Le titre est requis.');
+          return false;
+        }
+        if (_category == null) {
+          showAuthSnack(context, 'Choisissez une catégorie pour l\'événement.');
           return false;
         }
         return true;
@@ -196,6 +202,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           description: _descriptionCtrl.text,
           venue: _venueCtrl.text,
           city: _cityCtrl.text,
+          category: _category!,
           coverImageFile: _coverImage,
           videoUrl: _videoUrlCtrl.text,
           galleryFiles: _gallery,
@@ -214,6 +221,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           description: _descriptionCtrl.text,
           venue: _venueCtrl.text,
           city: _cityCtrl.text,
+          category: _category!,
           newCoverImageFile: _coverImage,
           coverImageUrl: existing.coverImageUrl,
           videoUrl: _videoUrlCtrl.text,
@@ -259,6 +267,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       descriptionCtrl: _descriptionCtrl,
                       venueCtrl: _venueCtrl,
                       cityCtrl: _cityCtrl,
+                      category: _category,
+                      onCategoryChanged: (c) => setState(() => _category = c),
                     ),
                     _DatesStep(
                       seances: _seances,
@@ -319,7 +329,7 @@ class _Header extends StatelessWidget {
               Expanded(
                 child: Text(
                   isEdit ? 'Modifier l\'événement' : 'Nouvel événement',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: authInk,
@@ -335,7 +345,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             _stepHints[step],
-            style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted),
+            style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted),
           ),
           const SizedBox(height: 18),
           Row(
@@ -361,7 +371,7 @@ class _Header extends StatelessWidget {
                           ? const Icon(Icons.check, size: 15, color: Colors.white)
                           : Text(
                               '${i + 1}',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: active ? Colors.white : authMuted,
@@ -384,7 +394,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Étape ${step + 1} sur 4 : ${_stepLabels[step]}',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
               color: authInk,
@@ -426,7 +436,7 @@ class _BottomBar extends StatelessWidget {
             icon: Icon(step == 0 ? Icons.close : Icons.arrow_back, size: 18, color: authInk),
             label: Text(
               step == 0 ? 'Annuler' : 'Précédent',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: authInk),
+              style: GoogleFonts.nunito(fontWeight: FontWeight.w600, color: authInk),
             ),
           ),
           const Spacer(),
@@ -449,7 +459,7 @@ class _BottomBar extends StatelessWidget {
                     )
                   : Text(
                       step == 3 ? (isEdit ? 'Enregistrer' : 'Créer l\'événement') : 'Continuer',
-                      style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.nunito(fontSize: 14.5, fontWeight: FontWeight.w600),
                     ),
             ),
           ),
@@ -492,7 +502,7 @@ class _SectionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                     color: authInk,
@@ -515,13 +525,13 @@ Widget _fieldLabel(String label) => Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
         label,
-        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk),
+        style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk),
       ),
     );
 
 InputDecoration _fieldDecoration(String hint) => InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+      hintStyle: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
       filled: true,
       fillColor: const Color(0xFFF7F8FA),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
@@ -548,12 +558,16 @@ class _InformationsStep extends StatelessWidget {
   final TextEditingController descriptionCtrl;
   final TextEditingController venueCtrl;
   final TextEditingController cityCtrl;
+  final EventCategory? category;
+  final ValueChanged<EventCategory> onCategoryChanged;
 
   const _InformationsStep({
     required this.titleCtrl,
     required this.descriptionCtrl,
     required this.venueCtrl,
     required this.cityCtrl,
+    required this.category,
+    required this.onCategoryChanged,
   });
 
   @override
@@ -563,7 +577,32 @@ class _InformationsStep extends StatelessWidget {
       title: 'INFORMATIONS',
       children: [
         _fieldLabel('Titre'),
-        TextField(controller: titleCtrl, style: GoogleFonts.poppins(fontSize: 14), decoration: _fieldDecoration('Festival Urbain de Douala')),
+        TextField(controller: titleCtrl, style: GoogleFonts.nunito(fontSize: 14), decoration: _fieldDecoration('Festival Urbain de Douala')),
+        const SizedBox(height: 16),
+        _fieldLabel('Catégorie'),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final c in EventCategory.values)
+              ChoiceChip(
+                selected: category == c,
+                onSelected: (_) => onCategoryChanged(c),
+                showCheckmark: false,
+                avatar: Icon(c.icon, size: 16, color: category == c ? Colors.white : authInk),
+                label: Text(c.label),
+                labelStyle: GoogleFonts.nunito(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: category == c ? Colors.white : authInk,
+                ),
+                selectedColor: authPrimary,
+                backgroundColor: Colors.white,
+                side: BorderSide(color: category == c ? authPrimary : authBorder),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+          ],
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -587,15 +626,15 @@ class _InformationsStep extends StatelessWidget {
         TextField(
           controller: descriptionCtrl,
           maxLines: 5,
-          style: GoogleFonts.poppins(fontSize: 14),
+          style: GoogleFonts.nunito(fontSize: 14),
           decoration: _fieldDecoration('Décrivez l\'événement pour le public...'),
         ),
         const SizedBox(height: 16),
         _fieldLabel('Lieu'),
-        TextField(controller: venueCtrl, style: GoogleFonts.poppins(fontSize: 14), decoration: _fieldDecoration('Palais des Congrès')),
+        TextField(controller: venueCtrl, style: GoogleFonts.nunito(fontSize: 14), decoration: _fieldDecoration('Palais des Congrès')),
         const SizedBox(height: 16),
         _fieldLabel('Ville'),
-        TextField(controller: cityCtrl, style: GoogleFonts.poppins(fontSize: 14), decoration: _fieldDecoration('Yaoundé')),
+        TextField(controller: cityCtrl, style: GoogleFonts.nunito(fontSize: 14), decoration: _fieldDecoration('Yaoundé')),
       ],
     );
   }
@@ -646,18 +685,18 @@ class _DatesStep extends StatelessWidget {
           children: [
             Text(
               'DATES & SÉANCES',
-              style: GoogleFonts.poppins(fontSize: 11.5, fontWeight: FontWeight.w700, color: authInk, letterSpacing: 0.6),
+              style: GoogleFonts.nunito(fontSize: 11.5, fontWeight: FontWeight.w700, color: authInk, letterSpacing: 0.6),
             ),
             TextButton.icon(
               onPressed: onAdd,
               icon: const Icon(Icons.add, size: 16, color: authPrimary),
-              label: Text('Ajouter une date', style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600, color: authPrimary)),
+              label: Text('Ajouter une date', style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w600, color: authPrimary)),
             ),
           ],
         ),
         Text(
           'Chaque séance aura ses propres types de billets, configurables après la création de l\'événement.',
-          style: GoogleFonts.poppins(fontSize: 12, color: authMuted),
+          style: GoogleFonts.nunito(fontSize: 12, color: authMuted),
         ),
         for (var i = 0; i < seances.length; i++)
           _SeanceCard(
@@ -718,7 +757,7 @@ class _SeanceCard extends StatelessWidget {
             children: [
               Text(
                 'SÉANCE ${index + 1}',
-                style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: authMuted, letterSpacing: 0.6),
+                style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: authMuted, letterSpacing: 0.6),
               ),
               if (onRemove != null)
                 GestureDetector(
@@ -731,7 +770,7 @@ class _SeanceCard extends StatelessWidget {
           _fieldLabel('Nom de la séance (optionnel)'),
           TextField(
             controller: draft.nameCtrl,
-            style: GoogleFonts.poppins(fontSize: 14),
+            style: GoogleFonts.nunito(fontSize: 14),
             decoration: _fieldDecoration('Jour 1, Soirée VIP...'),
           ),
           const SizedBox(height: 14),
@@ -773,7 +812,7 @@ class _DateTimeField extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               value == null ? 'Sélectionner date et heure' : formatter.format(value!),
-              style: GoogleFonts.poppins(fontSize: 13.5, color: value == null ? authMuted : authInk),
+              style: GoogleFonts.nunito(fontSize: 13.5, color: value == null ? authMuted : authInk),
             ),
           ],
         ),
@@ -833,8 +872,8 @@ class _VisuelsStep extends StatelessWidget {
                           children: [
                             const Icon(Icons.add_photo_alternate_outlined, size: 30, color: authMuted),
                             const SizedBox(height: 8),
-                            Text('Cliquer pour choisir une image', style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
-                            Text('JPG, PNG ou WebP, 5 Mo max', style: GoogleFonts.poppins(fontSize: 11, color: authMuted)),
+                            Text('Cliquer pour choisir une image', style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted)),
+                            Text('JPG, PNG ou WebP, 5 Mo max', style: GoogleFonts.nunito(fontSize: 11, color: authMuted)),
                           ],
                         ),
                       )
@@ -863,7 +902,7 @@ class _VisuelsStep extends StatelessWidget {
             _fieldLabel('Vidéo (URL)'),
             TextField(
               controller: videoUrlCtrl,
-              style: GoogleFonts.poppins(fontSize: 14),
+              style: GoogleFonts.nunito(fontSize: 14),
               decoration: _fieldDecoration('YouTube, Vimeo...'),
             ),
           ],
@@ -874,10 +913,10 @@ class _VisuelsStep extends StatelessWidget {
           trailing: TextButton.icon(
             onPressed: onAddGalleryImage,
             icon: const Icon(Icons.add, size: 15, color: authPrimary),
-            label: Text('Image', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: authPrimary)),
+            label: Text('Image', style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w600, color: authPrimary)),
           ),
           children: [
-            Text('Jusqu\'à 20 médias.', style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+            Text('Jusqu\'à 20 médias.', style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
             if (gallery.isNotEmpty) ...[
               const SizedBox(height: 12),
               SizedBox(
@@ -955,13 +994,13 @@ class _OptionsStep extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Événement gratuit', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: authInk)),
+                    Text('Événement gratuit', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w600, color: authInk)),
                     const SizedBox(height: 2),
                     Text(
                       isFree
                           ? 'Aucun paiement ne sera demandé au public.'
                           : 'Vous configurerez les prix des billets après la création.',
-                      style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted),
+                      style: GoogleFonts.nunito(fontSize: 11.5, color: authMuted),
                     ),
                   ],
                 ),
@@ -975,7 +1014,7 @@ class _OptionsStep extends StatelessWidget {
         TextField(
           controller: capacityCtrl,
           keyboardType: TextInputType.number,
-          style: GoogleFonts.poppins(fontSize: 14),
+          style: GoogleFonts.nunito(fontSize: 14),
           decoration: _fieldDecoration('Nombre de places maximum'),
         ),
         const SizedBox(height: 16),
@@ -983,7 +1022,7 @@ class _OptionsStep extends StatelessWidget {
         TextField(
           controller: refundPolicyCtrl,
           maxLines: 3,
-          style: GoogleFonts.poppins(fontSize: 14),
+          style: GoogleFonts.nunito(fontSize: 14),
           decoration: _fieldDecoration('Ex. remboursable jusqu\'à 48h avant l\'événement.'),
         ),
       ],

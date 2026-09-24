@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import 'home_screen.dart';
 import 'services/auth_service.dart';
+import 'session_gate.dart';
 import 'signup_screen.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -35,12 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _goToHome() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
-  }
+  // Vérifie aussi que le compte n'a pas été bloqué par l'administrateur.
+  void _goToHome() => enterApp(context);
 
   Future<void> _submitLogin() async {
     final email = _emailController.text.trim();
@@ -133,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Login',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                         color: authInk,
@@ -143,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Log in to access your account and discover events',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 13.5,
                         color: authMuted,
                         height: 1.4,
@@ -183,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: Text(
                           'Forgot password?',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: authInk,
@@ -205,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Log in with',
                       textAlign: TextAlign.center,
                       style:
-                          GoogleFonts.poppins(fontSize: 13, color: authMuted),
+                          GoogleFonts.nunito(fontSize: 13, color: authMuted),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -233,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(
                           "Don't have an account?",
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                             fontSize: 13,
                             color: authMuted,
                           ),
@@ -247,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Text(
                             'Sign up',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: authPrimary,

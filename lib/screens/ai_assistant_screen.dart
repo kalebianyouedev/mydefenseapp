@@ -100,7 +100,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
             const Icon(Icons.auto_awesome, size: 18, color: authPrimary),
             const SizedBox(width: 8),
             Text('Assistant IA',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                     fontSize: 16, fontWeight: FontWeight.w600, color: authInk)),
           ],
         ),
@@ -146,7 +146,7 @@ class _Intro extends StatelessWidget {
         Text(
           'Comment puis-je vous aider ?',
           textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.nunito(
               fontSize: 20, fontWeight: FontWeight.w700, color: authInk),
         ),
         const SizedBox(height: 8),
@@ -155,7 +155,7 @@ class _Intro extends StatelessWidget {
           'je réponds à vos questions sur les votes en ligne, et je rédige '
           'vos captions et annonces. En français ou en anglais.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+          style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
         ),
         const SizedBox(height: 24),
         for (final s in suggestions)
@@ -171,7 +171,7 @@ class _Intro extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
               ),
-              child: Text(s, style: GoogleFonts.poppins(fontSize: 13.5)),
+              child: Text(s, style: GoogleFonts.nunito(fontSize: 13.5)),
             ),
           ),
       ],
@@ -200,7 +200,7 @@ class _ExchangeView extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(exchange.question,
-                style: GoogleFonts.poppins(fontSize: 13.5, color: Colors.white)),
+                style: GoogleFonts.nunito(fontSize: 13.5, color: Colors.white)),
           ),
         ),
         if (exchange.error != null)
@@ -240,7 +240,7 @@ class _AssistantBubble extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(text,
-          style: GoogleFonts.poppins(fontSize: 13.5, color: authInk)),
+          style: GoogleFonts.nunito(fontSize: 13.5, color: authInk)),
     );
   }
 }
@@ -302,7 +302,7 @@ class _RecommendationCard extends StatelessWidget {
                   Text(event.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: authInk)),
@@ -310,18 +310,18 @@ class _RecommendationCard extends StatelessWidget {
                     Text(subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             fontSize: 12, color: authMuted)),
                   if (price.isNotEmpty)
                     Text(price,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
                             color: authPrimary)),
                   if (recommendation.reason.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(recommendation.reason,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             fontSize: 12, color: authInk, height: 1.35)),
                   ],
                 ],
@@ -356,7 +356,7 @@ class _GeneratedTextCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: SelectableText(text,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                     fontSize: 13.5, color: authInk, height: 1.45)),
           ),
           Align(
@@ -369,7 +369,7 @@ class _GeneratedTextCard extends StatelessWidget {
               style: TextButton.styleFrom(foregroundColor: authPrimary),
               icon: const Icon(Icons.copy_rounded, size: 16),
               label: Text('Copier',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                       fontSize: 12.5, fontWeight: FontWeight.w600)),
             ),
           ),
@@ -424,7 +424,7 @@ class _CampaignCard extends StatelessWidget {
                   Text(campaign.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: authInk)),
@@ -436,17 +436,17 @@ class _CampaignCard extends StatelessWidget {
                     ].join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(fontSize: 12, color: authMuted),
+                    style: GoogleFonts.nunito(fontSize: 12, color: authMuted),
                   ),
                   Text('Voter',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: authPrimary)),
                   if (recommendation.reason.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(recommendation.reason,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             fontSize: 12, color: authInk, height: 1.35)),
                   ],
                 ],
@@ -504,11 +504,11 @@ class _InputBar extends StatelessWidget {
                 maxLines: 3,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
-                style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+                style: GoogleFonts.nunito(fontSize: 14, color: authInk),
                 decoration: InputDecoration(
                   hintText: 'Événement, vote, caption…',
                   hintStyle:
-                      GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+                      GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
                   border: InputBorder.none,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

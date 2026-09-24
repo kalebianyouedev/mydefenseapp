@@ -46,9 +46,6 @@ dependencies:
   # Firebase Firestore (profil utilisateur, posts, organisations)
   cloud_firestore: 6.10.0
 
-  # Firebase Storage : uniquement pour les vidéos, que StockImg ne gère
-  # pas (voir lib/services/stockimg_client.dart, qui couvre les images).
-  firebase_storage: 13.6.0
 
   # Stockage des images (photos de profil/bannière, posts image, logos
   # d'organisation) via l'API StockImg. Firebase gère l'authentification

@@ -67,7 +67,7 @@ class _OrganisationHubScreenState extends State<OrganisationHubScreen> {
         foregroundColor: authInk,
         title: Text(
           'Tableau de bord',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.nunito(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: authInk,
@@ -124,7 +124,7 @@ class _OrganisationHubScreenState extends State<OrganisationHubScreen> {
                               alignment: Alignment.center,
                               child: Text(
                                 org.name,
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.nunito(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: active ? Colors.white : authMuted,
@@ -141,7 +141,7 @@ class _OrganisationHubScreenState extends State<OrganisationHubScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Actions rapides',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: authInk,
@@ -254,7 +254,7 @@ class _DashboardCard extends StatelessWidget {
               children: [
                 Text(
                   organisation.name,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                     fontSize: 16.5,
                     fontWeight: FontWeight.w700,
                     color: authInk,
@@ -266,7 +266,7 @@ class _DashboardCard extends StatelessWidget {
                     organisation.description!,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                         fontSize: 12.5, color: authMuted),
                   ),
                 ],
@@ -274,7 +274,7 @@ class _DashboardCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Créée le ${DateFormat.yMMMd('fr_FR').format(organisation.createdAt!)}',
-                    style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted),
+                    style: GoogleFonts.nunito(fontSize: 11.5, color: authMuted),
                   ),
                 ],
               ],
@@ -327,7 +327,7 @@ class _HubTile extends StatelessWidget {
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                   color: authInk,
@@ -367,7 +367,7 @@ class _EmptyHub extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'Aucune organisation',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: authInk,
@@ -377,7 +377,7 @@ class _EmptyHub extends StatelessWidget {
             Text(
               'Créez votre organisation pour accéder à son tableau de bord (événements, votes, campagnes, membres, portefeuille...).',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+              style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -394,7 +394,7 @@ class _EmptyHub extends StatelessWidget {
               ),
               child: Text(
                 'Créer une organisation',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

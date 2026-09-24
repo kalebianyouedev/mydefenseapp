@@ -104,7 +104,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   onPressed: _isLastPage ? null : _goToLogin,
                   child: Text(
                     'Skip',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: _isLastPage
@@ -184,7 +184,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             Text(
                               page.title,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A1E),
@@ -194,7 +194,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             Text(
                               page.subtitle,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                 fontSize: 14,
                                 color: const Color(0xFF6B6B72),
                                 height: 1.5,
@@ -250,7 +250,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                   child: Text(
                     _isLastPage ? 'Get Started' : 'Next',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

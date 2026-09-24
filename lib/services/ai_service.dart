@@ -248,6 +248,23 @@ class AiService {
     );
   }
 
+  Future<String> generateVoteCampaignDescription({
+    required String title,
+    String organisationName = '',
+    String existing = '',
+    String instructions = '',
+  }) {
+    return _write(
+      "Rédige la description publique d'une campagne de vote en ligne "
+      "(80 à 130 mots) : présente l'enjeu du concours, explique que le "
+      'public soutient son candidat préféré en achetant des votes par '
+      'Mobile Money, et donne envie de participer.\n'
+      'Titre : $title\n'
+      '${organisationName.trim().isEmpty ? '' : 'Organisateur : $organisationName\n'}'
+      '${_draftPart(existing)}${_instructionsPart(instructions)}',
+    );
+  }
+
   Future<String> generateCandidateBio({
     required String name,
     String shortDescription = '',
@@ -443,6 +460,7 @@ class AiService {
             'id': e.id,
             'titre': e.title,
             'organisateur': e.organisationName,
+            'categorie': e.category.label,
             'ville': e.city,
             'lieu': e.venue,
             'prixMinXAF': priceById[e.id],

@@ -44,11 +44,11 @@ class _VoteOrderConfirmationScreenState extends State<VoteOrderConfirmationScree
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Votre vote', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text('Votre vote', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-            child: Text('Accueil', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authMuted)),
+            child: Text('Accueil', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authMuted)),
           ),
         ],
       ),
@@ -93,14 +93,14 @@ class _PendingView extends StatelessWidget {
           ),
           const SizedBox(height: 22),
           Text('Demande de paiement envoyée', textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
+              style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 10),
           Text(
             'Une demande de ${fmt.format(order.totalAmount)} XAF a été envoyée par ${paymentMethodLabel(order.paymentMethod)} au ${order.paymentPhone} '
             'pour ${order.quantity} vote${order.quantity > 1 ? 's' : ''} en faveur de ${order.candidateName}. '
             'Validez-la sur votre téléphone, puis confirmez ci-dessous.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted, height: 1.5),
+            style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted, height: 1.5),
           ),
           const SizedBox(height: 30),
           SizedBox(
@@ -116,7 +116,7 @@ class _PendingView extends StatelessWidget {
               ),
               child: confirming
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                  : Text('J\'ai validé le paiement', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
+                  : Text('J\'ai validé le paiement', style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -144,17 +144,17 @@ class _ConfirmedView extends StatelessWidget {
             child: const Icon(Icons.check_circle, size: 46, color: Color(0xFF1E9E6B)),
           ),
           const SizedBox(height: 20),
-          Text('Vote confirmé !', style: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Vote confirmé !', style: GoogleFonts.nunito(fontSize: 19, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 8),
           Text(
             '${order.quantity} vote${order.quantity > 1 ? 's' : ''} enregistré${order.quantity > 1 ? 's' : ''} pour ${order.candidateName}, '
             'dans la catégorie ${order.categoryTitle}.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted, height: 1.5),
+            style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted, height: 1.5),
           ),
           const SizedBox(height: 6),
           Text('Merci d\'avoir participé à « ${order.campaignTitle} ».',
-              textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
+              textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted)),
         ],
       ),
     );

@@ -59,13 +59,13 @@ class ManageVoteCandidatesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text(category.title, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text(category.title, style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(context),
         backgroundColor: authPrimary,
         icon: const Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
-        label: Text('Candidat', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white)),
+        label: Text('Candidat', style: GoogleFonts.nunito(fontWeight: FontWeight.w600, color: Colors.white)),
       ),
       body: SafeArea(
         child: StreamBuilder<List<VoteCandidate>>(
@@ -80,7 +80,7 @@ class ManageVoteCandidatesScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(32),
                   child: Text('Aucun candidat. Ajoutez-en un avec le bouton ci-dessous.',
-                      textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                      textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                 ),
               );
             }
@@ -128,7 +128,7 @@ class _CandidateTile extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(color: authInk, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white, width: 1.5)),
-                  child: Text('N°${candidate.number}', style: GoogleFonts.poppins(fontSize: 9.5, fontWeight: FontWeight.w700, color: Colors.white)),
+                  child: Text('N°${candidate.number}', style: GoogleFonts.nunito(fontSize: 9.5, fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
               ),
             ],
@@ -138,20 +138,20 @@ class _CandidateTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(candidate.name, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                Text(candidate.name, style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                 if (candidate.description.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(candidate.description, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                      style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                 ],
                 if (candidate.bio.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(candidate.bio, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted)),
+                      style: GoogleFonts.nunito(fontSize: 11.5, color: authMuted)),
                 ],
                 const SizedBox(height: 4),
                 Text('${candidate.voteCount} vote${candidate.voteCount > 1 ? 's' : ''}',
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: authPrimary)),
+                    style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: authPrimary)),
               ],
             ),
           ),
@@ -200,6 +200,10 @@ class _CandidateFormState extends State<_CandidateForm> {
       showAuthSnack(context, 'Le nom du candidat est requis.');
       return;
     }
+    if (_photo == null) {
+      showAuthSnack(context, 'Ajoutez une photo du candidat.');
+      return;
+    }
     setState(() => _saving = true);
     try {
       await VoteService.instance.addCandidate(
@@ -208,7 +212,7 @@ class _CandidateFormState extends State<_CandidateForm> {
         name: name,
         description: _descriptionCtrl.text,
         bio: _bioCtrl.text,
-        photoFile: _photo,
+        photoFile: _photo!,
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -226,16 +230,33 @@ class _CandidateFormState extends State<_CandidateForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Nouveau candidat', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Nouveau candidat', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 16),
           Center(
             child: GestureDetector(
               onTap: _pickPhoto,
-              child: CircleAvatar(
-                radius: 40,
-                backgroundColor: const Color(0xFFF4F4F6),
-                backgroundImage: _photo != null ? FileImage(_photo!) : null,
-                child: _photo == null ? const Icon(Icons.add_a_photo_outlined, color: authMuted) : null,
+              child: Container(
+                width: 120,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F4F6),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: authBorder),
+                  // Aperçu entier (non rogné), comme l'affichage public.
+                  image: _photo != null ? DecorationImage(image: FileImage(_photo!), fit: BoxFit.contain) : null,
+                ),
+                child: _photo == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add_a_photo_outlined, color: authMuted),
+                          const SizedBox(height: 6),
+                          Text('Photo\n(obligatoire)',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.nunito(fontSize: 11, color: authMuted)),
+                        ],
+                      )
+                    : null,
               ),
             ),
           ),
@@ -272,7 +293,7 @@ class _CandidateFormState extends State<_CandidateForm> {
               ),
               child: _saving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
-                  : Text('Ajouter le candidat', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  : Text('Ajouter le candidat', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
             ),
           ),
         ],

@@ -25,7 +25,7 @@ class ManageTicketTypesScreen extends StatelessWidget {
         elevation: 0,
         foregroundColor: authInk,
         title: Text('Types de billets',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+            style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
       ),
       body: SafeArea(
         child: StreamBuilder<List<TicketType>>(
@@ -38,7 +38,7 @@ class ManageTicketTypesScreen extends StatelessWidget {
                 for (final seance in event.seances) ...[
                   Text(
                     seance.name ?? DateFormat('d MMM y • HH:mm', 'fr_FR').format(seance.start),
-                    style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk),
+                    style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk),
                   ),
                   const SizedBox(height: 10),
                   ...types.where((t) => t.seanceId == seance.id).map(
@@ -52,7 +52,7 @@ class ManageTicketTypesScreen extends StatelessWidget {
                     onPressed: () => _openForm(context, seance: seance),
                     icon: const Icon(Icons.add, size: 16, color: authPrimary),
                     label: Text('Ajouter un type de billet',
-                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authPrimary)),
+                        style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authPrimary)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: authBorder),
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -123,11 +123,11 @@ class _TicketTypeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(type.name, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                Text(type.name, style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                 const SizedBox(height: 3),
                 Text(
                   '${fmt.format(type.price)} XAF · ${type.quantityTotal == null ? 'Illimité' : '${type.remaining} / ${type.quantityTotal} restants'}',
-                  style: GoogleFonts.poppins(fontSize: 12, color: authMuted),
+                  style: GoogleFonts.nunito(fontSize: 12, color: authMuted),
                 ),
               ],
             ),
@@ -211,7 +211,7 @@ class _TicketTypeFormState extends State<_TicketTypeForm> {
         children: [
           Text(
             widget.existing == null ? 'Nouveau type de billet' : 'Modifier le type de billet',
-            style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk),
+            style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -244,7 +244,7 @@ class _TicketTypeFormState extends State<_TicketTypeForm> {
               ),
               child: _saving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
-                  : Text('Enregistrer', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  : Text('Enregistrer', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
             ),
           ),
         ],

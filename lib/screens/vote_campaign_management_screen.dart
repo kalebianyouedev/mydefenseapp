@@ -77,15 +77,15 @@ class VoteCampaignManagementScreen extends StatelessWidget {
                         _StatusBadge(status: campaign.status),
                         const SizedBox(height: 10),
                         Text(campaign.title,
-                            style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
+                            style: GoogleFonts.nunito(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
                         if (campaign.description.isNotEmpty) ...[
                           const SizedBox(height: 6),
-                          Text(campaign.description, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                          Text(campaign.description, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                         ],
                         if (campaign.endsAt != null) ...[
                           const SizedBox(height: 8),
                           Text('Fin le ${DateFormat("d MMMM y 'à' HH'h'mm", 'fr_FR').format(campaign.endsAt!)}',
-                              style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
+                              style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted)),
                         ],
                         const SizedBox(height: 18),
                         Wrap(
@@ -135,9 +135,9 @@ class VoteCampaignManagementScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 26),
-                        Text('Vue financière', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                        Text('Vue financière', style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                         Text('Résumé des achats de votes confirmés.',
-                            style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                            style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                         const SizedBox(height: 14),
                         StreamBuilder<List<VoteOrder>>(
                           stream: VoteService.instance.watchCampaignOrders(campaignId),
@@ -217,7 +217,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      child: Text(label, style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
     );
   }
 }
@@ -254,7 +254,7 @@ class _ActionChip extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 6),
-              Text(label, style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600, color: color)),
+              Text(label, style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w600, color: color)),
             ],
           ),
         ),
@@ -295,9 +295,9 @@ class _FinancialGrid extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(i.$1.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9.5, fontWeight: FontWeight.w700, color: authMuted, letterSpacing: 0.4)),
+                    Text(i.$1.toUpperCase(), style: GoogleFonts.nunito(fontSize: 9.5, fontWeight: FontWeight.w700, color: authMuted, letterSpacing: 0.4)),
                     const SizedBox(height: 4),
-                    Text(i.$2, style: GoogleFonts.poppins(fontSize: 15.5, fontWeight: FontWeight.w800, color: authInk)),
+                    Text(i.$2, style: GoogleFonts.nunito(fontSize: 15.5, fontWeight: FontWeight.w800, color: authInk)),
                   ],
                 ),
               ))

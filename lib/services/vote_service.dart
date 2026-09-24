@@ -47,7 +47,7 @@ class VoteService {
     required Organisation organisation,
     required String title,
     required String description,
-    File? coverImageFile,
+    required File coverImageFile,
     DateTime? startsAt,
     DateTime? endsAt,
   }) async {
@@ -56,17 +56,18 @@ class VoteService {
     if (title.trim().isEmpty) {
       throw StateError('Le titre de la campagne est requis.');
     }
-
-    String? coverImageUrl;
-    if (coverImageFile != null) {
-      coverImageUrl = await StockImgClient.instance.uploadFile(coverImageFile);
+    if (organisation.blocked) {
+      throw StateError("Cette organisation est bloquée par l'administrateur.");
     }
+
+    final coverImageUrl = await StockImgClient.instance.uploadFile(coverImageFile);
 
     final doc = _campaigns.doc();
     final campaign = VoteCampaign(
       id: doc.id,
       organisationId: organisation.id,
       organisationName: organisation.name,
+      organisationCertified: organisation.certified,
       ownerId: uid,
       title: title.trim(),
       description: description.trim(),
@@ -126,7 +127,10 @@ class VoteService {
         .limit(100)
         .snapshots()
         .map((snap) =>
-            snap.docs.map((d) => VoteCampaign.fromMap(d.id, d.data())).toList())
+            snap.docs
+            .map((d) => VoteCampaign.fromMap(d.id, d.data()))
+            .where((c) => !c.hiddenByAdmin)
+            .toList())
         .handleError((_) => <VoteCampaign>[]);
   }
 
@@ -138,7 +142,10 @@ class VoteService {
         .limit(limit)
         .get()
         .timeout(_timeout);
-    return snap.docs.map((d) => VoteCampaign.fromMap(d.id, d.data())).toList();
+    return snap.docs
+        .map((d) => VoteCampaign.fromMap(d.id, d.data()))
+        .where((c) => !c.hiddenByAdmin)
+        .toList();
   }
 
   Future<List<VoteCategory>> fetchCategories(String campaignId) async {
@@ -226,15 +233,12 @@ class VoteService {
     required String name,
     required String description,
     required String bio,
-    File? photoFile,
+    required File photoFile,
   }) async {
     if (name.trim().isEmpty) {
       throw StateError('Le nom du candidat est requis.');
     }
-    String? photoUrl;
-    if (photoFile != null) {
-      photoUrl = await StockImgClient.instance.uploadFile(photoFile);
-    }
+    final photoUrl = await StockImgClient.instance.uploadFile(photoFile);
     final existing = await _candidates(campaignId, categoryId).count().get().timeout(_timeout);
     final number = (existing.count ?? 0) + 1;
     final doc = _candidates(campaignId, categoryId).doc();

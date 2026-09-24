@@ -59,7 +59,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
                   const SizedBox(height: 14),
                   Text(
                     'Aucune publication pour le moment.',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                         fontSize: 14, color: Colors.white),
                   ),
                 ],
@@ -238,7 +238,7 @@ class _PostCardState extends State<_PostCard> {
                     const SizedBox(width: 5),
                     Text(
                       'Republié de ${post.originalAuthorName ?? ''}',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           fontSize: 11.5, color: Colors.white70),
                     ),
                   ],
@@ -328,7 +328,7 @@ class _PostCardState extends State<_PostCard> {
                 children: [
                   Text(
                     '@${post.authorName}',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -358,7 +358,7 @@ class _PostCardState extends State<_PostCard> {
                             ),
                             child: Text(
                               following ? 'Abonné(e)' : 'Suivre',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -377,7 +377,7 @@ class _PostCardState extends State<_PostCard> {
                   post.caption,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                       fontSize: 13, color: Colors.white),
                 ),
               ],
@@ -416,7 +416,7 @@ class _AuthorAvatar extends StatelessWidget {
                   post.authorName.isNotEmpty
                       ? post.authorName[0].toUpperCase()
                       : '?',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -452,7 +452,7 @@ class _ActionButton extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.white,

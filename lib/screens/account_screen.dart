@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../welcome_screen.dart';
 import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted;
+import 'my_follows_screen.dart';
 import 'my_publications_screen.dart';
 import 'organisation_hub_screen.dart';
 import 'placeholder_screen.dart';
@@ -71,7 +72,7 @@ class AccountScreen extends StatelessWidget {
             Center(
               child: Text(
                 'Mon compte',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: authInk,
@@ -94,10 +95,15 @@ class AccountScreen extends StatelessWidget {
             _AccountRow(
               icon: Icons.favorite_border_rounded,
               label: 'Mes favoris',
-              onTap: () => _openPlaceholder(
-                context,
-                title: 'Mes favoris',
-                icon: Icons.favorite_border_rounded,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MyFavoritesScreen()),
+              ),
+            ),
+            _AccountRow(
+              icon: Icons.notifications_active_outlined,
+              label: 'Mes abonnements',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MyFollowsScreen()),
               ),
             ),
             _AccountRow(
@@ -186,7 +192,7 @@ class AccountScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   Text(
                     'Se déconnecter',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.nunito(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w600,
                       color: authPrimary,
@@ -241,7 +247,7 @@ class _ProfileHeader extends StatelessWidget {
           child: avatarImage == null
               ? Text(
                   initials,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.nunito(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: authPrimary,
@@ -258,7 +264,7 @@ class _ProfileHeader extends StatelessWidget {
                 displayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 16.5,
                   fontWeight: FontWeight.w700,
                   color: authInk,
@@ -269,7 +275,7 @@ class _ProfileHeader extends StatelessWidget {
                 email,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted),
+                style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted),
               ),
             ],
           ),
@@ -307,7 +313,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.nunito(
         fontSize: 11.5,
         fontWeight: FontWeight.w600,
         color: authMuted,
@@ -342,7 +348,7 @@ class _AccountRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w500,
                   color: authInk,

@@ -183,10 +183,10 @@ class _ScanCheckinScreenState extends State<ScanCheckinScreen> {
             Text(widget.event.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                     fontSize: 15, fontWeight: FontWeight.w600)),
             Text('$_validated entrée${_validated > 1 ? 's' : ''} validée${_validated > 1 ? 's' : ''}',
-                style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.white70)),
+                style: GoogleFonts.nunito(fontSize: 11.5, color: Colors.white70)),
           ],
         ),
         actions: [
@@ -228,7 +228,7 @@ class _ScanCheckinScreenState extends State<ScanCheckinScreen> {
               child: Text(
                 _busy ? 'Vérification…' : 'Placez le QR code du billet dans le cadre',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                     fontSize: 13.5, color: Colors.white, fontWeight: FontWeight.w500),
               ),
             ),
@@ -246,7 +246,7 @@ class _ScanCheckinScreenState extends State<ScanCheckinScreen> {
                     Text(
                       result.title.toUpperCase(),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
                           color: Colors.white),
@@ -254,14 +254,14 @@ class _ScanCheckinScreenState extends State<ScanCheckinScreen> {
                     if (result.ok) ...[
                       const SizedBox(height: 4),
                       Text('Accès autorisé',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white)),
                     ] else ...[
                       const SizedBox(height: 4),
                       Text('Accès refusé',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white)),
@@ -271,7 +271,7 @@ class _ScanCheckinScreenState extends State<ScanCheckinScreen> {
                       Text(
                         result.details,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             fontSize: 14, color: Colors.white, height: 1.4),
                       ),
                     ],

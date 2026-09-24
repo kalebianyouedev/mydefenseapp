@@ -28,7 +28,7 @@ class PlaceholderScreen extends StatelessWidget {
         foregroundColor: authInk,
         title: Text(
           title,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.nunito(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: authInk,
@@ -52,7 +52,7 @@ class PlaceholderScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               title,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: authInk,
@@ -61,7 +61,7 @@ class PlaceholderScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               message,
-              style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+              style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
             ),
           ],
         ),

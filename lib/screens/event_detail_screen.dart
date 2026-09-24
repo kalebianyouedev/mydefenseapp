@@ -6,7 +6,9 @@ import '../models/event.dart';
 import '../models/order.dart';
 import '../models/ticket_type.dart';
 import '../services/event_service.dart';
-import '../widgets/auth_widgets.dart' show authPrimary, authInk, authMuted, authBorder;
+import '../widgets/auth_widgets.dart' show authPrimary, authAccent, authInk, authMuted, authBorder;
+import '../widgets/event_actions.dart';
+import '../widgets/event_cover.dart';
 import 'checkout_screen.dart';
 
 /// Page publique d'un événement : détails, séances et types de billets
@@ -61,26 +63,57 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (event.organisationName.isNotEmpty)
-                                Text(event.organisationName.toUpperCase(),
-                                    style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: authPrimary, letterSpacing: 0.6)),
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(event.organisationName.toUpperCase(),
+                                          style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: authPrimary, letterSpacing: 0.6)),
+                                    ),
+                                    if (event.organisationCertified) ...[
+                                      const SizedBox(width: 4),
+                                      const Icon(Icons.verified, size: 15, color: Color(0xFF2D6BE0)),
+                                    ],
+                                    const Spacer(),
+                                    FollowOrganisationButton(
+                                      organisationId: event.organisationId,
+                                      organisationName: event.organisationName,
+                                      organisationLogoUrl: event.organisationLogoUrl,
+                                    ),
+                                  ],
+                                ),
                               const SizedBox(height: 4),
-                              Text(event.title, style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
+                              Text(event.title, style: GoogleFonts.nunito(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
+                              const SizedBox(height: 10),
+                              // Compteurs à jour en direct (j'aime, boosts).
+                              StreamBuilder<Event?>(
+                                stream: EventService.instance.watchOne(event.id),
+                                builder: (context, snap) {
+                                  final live = snap.data ?? event;
+                                  return Row(
+                                    children: [
+                                      EventLikeButton(event: live),
+                                      const SizedBox(width: 8),
+                                      EventBoostButton(event: live),
+                                    ],
+                                  );
+                                },
+                              ),
                               const SizedBox(height: 10),
                               if (event.venue.isNotEmpty || event.city.isNotEmpty)
                                 _iconLine(Icons.place_outlined, [event.venue, event.city].where((e) => e.isNotEmpty).join(', ')),
                               if (event.description.isNotEmpty) ...[
                                 const SizedBox(height: 16),
-                                Text(event.description, style: GoogleFonts.poppins(fontSize: 13.5, color: authInk, height: 1.5)),
+                                Text(event.description, style: GoogleFonts.nunito(fontSize: 13.5, color: authInk, height: 1.5)),
                               ],
                               if (event.gallery.isNotEmpty) ...[
                                 const SizedBox(height: 20),
-                                Text('Photos', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                                Text('Photos', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                                 const SizedBox(height: 10),
                                 _Gallery(images: event.gallery),
                               ],
                               if (event.seances.length > 1) ...[
                                 const SizedBox(height: 20),
-                                Text('Séances', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                                Text('Séances', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                                 const SizedBox(height: 10),
                                 Wrap(
                                   spacing: 8,
@@ -98,7 +131,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                         ),
                                         child: Text(
                                           s.name ?? DateFormat('d MMM • HH:mm', 'fr_FR').format(s.start),
-                                          style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600, color: active ? Colors.white : authMuted),
+                                          style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w600, color: active ? Colors.white : authMuted),
                                         ),
                                       ),
                                     );
@@ -110,10 +143,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     DateFormat("EEEE d MMMM y 'à' HH'h'mm", 'fr_FR').format(_selectedSeance!.start)),
                               ],
                               const SizedBox(height: 22),
-                              Text('Billets', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                              Text('Billets', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                               const SizedBox(height: 10),
                               if (types.isEmpty)
-                                Text('Aucun billet disponible pour le moment.', style: GoogleFonts.poppins(fontSize: 13, color: authMuted))
+                                Text('Aucun billet disponible pour le moment.', style: GoogleFonts.nunito(fontSize: 13, color: authMuted))
                               else
                                 ...types.map((t) => _TicketTypeSelector(
                                       type: t,
@@ -169,7 +202,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       children: [
         Icon(icon, size: 15, color: authMuted),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: GoogleFonts.poppins(fontSize: 13, color: authMuted))),
+        Expanded(child: Text(text, style: GoogleFonts.nunito(fontSize: 13, color: authMuted))),
       ],
     );
   }
@@ -180,36 +213,16 @@ class _Cover extends StatelessWidget {
 
   const _Cover({required this.event});
 
-  Widget _fallback() {
-    return Container(
-      decoration: const BoxDecoration(color: authInk),
-      child: const Center(child: Icon(Icons.festival_outlined, size: 52, color: Colors.white70)),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 280,
+      height: 340,
       width: double.infinity,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          event.coverImageUrl != null
-              ? Image.network(
-                  event.coverImageUrl!,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return Container(
-                      color: const Color(0xFFF4F4F6),
-                      alignment: Alignment.center,
-                      child: const CircularProgressIndicator(color: authPrimary, strokeWidth: 2.4),
-                    );
-                  },
-                  errorBuilder: (_, _, _) => _fallback(),
-                )
-              : _fallback(),
+          // Affiche entière sur fond flou : rien n'est rogné.
+          EventCover(imageUrl: event.coverImageUrl, fallbackIconSize: 52),
           // Léger dégradé pour garder le bouton retour lisible sur toute photo.
           const DecoratedBox(
             decoration: BoxDecoration(
@@ -226,8 +239,29 @@ class _Cover extends StatelessWidget {
             left: 8,
             child: IconButton(
               onPressed: () => Navigator.of(context).pop(),
-              style: IconButton.styleFrom(backgroundColor: Colors.black.withOpacity(0.35)),
+              style: IconButton.styleFrom(backgroundColor: Colors.black.withValues(alpha: 0.35)),
               icon: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
+          ),
+          Positioned(
+            right: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(event.category.icon, size: 14, color: Colors.white),
+                  const SizedBox(width: 6),
+                  Text(event.category.label,
+                      style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                ],
+              ),
             ),
           ),
         ],
@@ -346,11 +380,11 @@ class _TicketTypeSelector extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(type.name, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                Text(type.name, style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                 const SizedBox(height: 3),
                 Text(
                   soldOut ? 'Épuisé' : '${fmt.format(type.price)} XAF',
-                  style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600, color: soldOut ? authPrimary : authMuted),
+                  style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w600, color: soldOut ? authPrimary : authMuted),
                 ),
               ],
             ),
@@ -359,7 +393,7 @@ class _TicketTypeSelector extends StatelessWidget {
             Row(
               children: [
                 _stepperButton(Icons.remove, quantity > 0 ? () => onChanged(quantity - 1) : null),
-                SizedBox(width: 28, child: Text('$quantity', textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700))),
+                SizedBox(width: 28, child: Text('$quantity', textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700))),
                 _stepperButton(Icons.add, type.remaining == null || quantity < type.remaining! ? () => onChanged(quantity + 1) : null),
               ],
             ),
@@ -403,8 +437,8 @@ class _BuyBar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$ticketCount billet${ticketCount > 1 ? 's' : ''}', style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted)),
-                Text('${fmt.format(total)} XAF', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+                Text('$ticketCount billet${ticketCount > 1 ? 's' : ''}', style: GoogleFonts.nunito(fontSize: 11.5, color: authMuted)),
+                Text('${fmt.format(total)} XAF', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
               ],
             ),
           ),
@@ -413,13 +447,13 @@ class _BuyBar extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onBuy,
               style: ElevatedButton.styleFrom(
-                backgroundColor: authPrimary,
+                backgroundColor: authAccent,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 28),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: const StadiumBorder(),
               ),
-              child: Text('Acheter', style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w600)),
+              child: Text('Acheter', style: GoogleFonts.nunito(fontSize: 14.5, fontWeight: FontWeight.w600)),
             ),
           ),
         ],

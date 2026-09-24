@@ -25,7 +25,7 @@ class LiquidGlassNavBar extends StatelessWidget {
     _NavItem(
       icon: Icons.event_outlined,
       activeIcon: Icons.event_rounded,
-      label: 'Events',
+      label: 'Événements',
     ),
     _NavItem(
       icon: Icons.how_to_vote_outlined,
@@ -38,12 +38,12 @@ class LiquidGlassNavBar extends StatelessWidget {
     _NavItem(
       icon: Icons.confirmation_number_outlined,
       activeIcon: Icons.confirmation_number_rounded,
-      label: 'Orders',
+      label: 'Billets',
     ),
     _NavItem(
       icon: Icons.person_outline_rounded,
       activeIcon: Icons.person_rounded,
-      label: 'Account',
+      label: 'Compte',
     ),
   ];
 
@@ -115,7 +115,7 @@ class LiquidGlassNavBar extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             item.label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: 10,
               fontWeight: active ? FontWeight.w600 : FontWeight.w500,
               color: active ? authPrimary : authMuted,
@@ -154,7 +154,7 @@ class LiquidGlassNavBar extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Posts',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: 10,
               fontWeight: active ? FontWeight.w600 : FontWeight.w500,
               color: active ? authPrimary : authInk,

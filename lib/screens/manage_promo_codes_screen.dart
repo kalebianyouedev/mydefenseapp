@@ -30,7 +30,7 @@ class ManagePromoCodesScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Nouveau code promo', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+            Text('Nouveau code promo', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
             const SizedBox(height: 16),
             TextField(
               controller: codeCtrl,
@@ -80,7 +80,7 @@ class ManagePromoCodesScreen extends StatelessWidget {
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: Text('Créer', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                child: Text('Créer', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -100,7 +100,7 @@ class ManagePromoCodesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Codes promo', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text('Codes promo', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addCode(context),
@@ -119,7 +119,7 @@ class ManagePromoCodesScreen extends StatelessWidget {
                   child: Text(
                     'Aucun code promo. Créez-en un pour offrir une réduction au checkout.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+                    style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
                   ),
                 ),
               );
@@ -139,11 +139,11 @@ class ManagePromoCodesScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(promo.code, style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w700, color: authInk)),
+                            Text(promo.code, style: GoogleFonts.nunito(fontSize: 14.5, fontWeight: FontWeight.w700, color: authInk)),
                             const SizedBox(height: 3),
                             Text(
                               '-${promo.percentOff}% · ${promo.maxUses == null ? '${promo.usedCount} utilisations' : '${promo.usedCount}/${promo.maxUses} utilisations'}',
-                              style: GoogleFonts.poppins(fontSize: 12, color: authMuted),
+                              style: GoogleFonts.nunito(fontSize: 12, color: authMuted),
                             ),
                           ],
                         ),

@@ -75,7 +75,7 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
         foregroundColor: authInk,
         title: Text(
           'Nouvelle organisation',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.nunito(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: authInk,
@@ -113,13 +113,13 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
               Center(
                 child: Text(
                   'Logo (optionnel)',
-                  style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted),
+                  style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted),
                 ),
               ),
               const SizedBox(height: 28),
               Text(
                 'Nom de l\'organisation',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: authInk,
@@ -128,10 +128,10 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _nameCtrl,
-                style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+                style: GoogleFonts.nunito(fontSize: 14, color: authInk),
                 decoration: InputDecoration(
                   hintText: 'Ex : Afro Nights Events',
-                  hintStyle: GoogleFonts.poppins(fontSize: 14, color: authMuted),
+                  hintStyle: GoogleFonts.nunito(fontSize: 14, color: authMuted),
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
@@ -154,7 +154,7 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
                   Expanded(
                     child: Text(
                       'Description (optionnel)',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: authInk,
@@ -180,10 +180,10 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
                 controller: _descriptionCtrl,
                 minLines: 3,
                 maxLines: 5,
-                style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+                style: GoogleFonts.nunito(fontSize: 14, color: authInk),
                 decoration: InputDecoration(
                   hintText: 'Décrivez votre structure en quelques mots...',
-                  hintStyle: GoogleFonts.poppins(fontSize: 14, color: authMuted),
+                  hintStyle: GoogleFonts.nunito(fontSize: 14, color: authMuted),
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
@@ -225,7 +225,7 @@ class _CreateOrganisationScreenState extends State<CreateOrganisationScreen> {
                         )
                       : Text(
                           'Créer l\'organisation',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),

@@ -150,7 +150,8 @@ bool Win32Window::Create(const std::wstring& title,
 }
 
 bool Win32Window::Show() {
-  return ShowWindow(window_handle_, SW_SHOWNORMAL);
+  // Ouverture plein écran : l'espace admin est pensé pour le bureau.
+  return ShowWindow(window_handle_, SW_SHOWMAXIMIZED);
 }
 
 // static

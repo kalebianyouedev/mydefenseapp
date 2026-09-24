@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/order.dart';
+import '../models/organisation.dart';
 import '../models/payment_method.dart';
 import '../models/vote_order.dart';
 import '../models/withdrawal.dart';
@@ -9,6 +10,9 @@ import 'auth_service.dart';
 /// Même taux que la vue financière par événement
 /// (voir `_platformCommissionRate` dans event_management_screen.dart).
 const kPlatformCommissionRate = 0.10;
+
+/// Montant minimum d'une demande de retrait.
+const kMinWithdrawalAmount = 1000;
 
 /// Une entrée de recette (vente de billets ou achat de votes confirmé)
 /// qui compte dans le solde de l'organisation. Sert à l'historique
@@ -95,7 +99,12 @@ class WalletService {
   /// Additionne les commandes confirmées de tous les événements de
   /// l'organisation, puis retire ce qui a déjà été retiré ou est en
   /// attente de retrait, pour obtenir le solde disponible.
-  Future<WalletSummary> fetchSummary(String organisationId) async {
+  ///
+  /// [ownerId] (propriétaire de l'organisation) vaut par défaut
+  /// l'utilisateur courant ; l'administrateur le passe pour contrôler le
+  /// solde d'une organisation avant de valider un retrait.
+  Future<WalletSummary> fetchSummary(String organisationId, {String? ownerId}) async {
+    final owner = ownerId ?? _uid;
     final eventDocs = await _safeDocs(
         _db.collection('events').where('organisationId', isEqualTo: organisationId));
 
@@ -103,7 +112,7 @@ class WalletService {
     final ordersDocsList = await Future.wait(eventDocs.map(
       (eventDoc) => _safeDocs(_db
           .collection('orders')
-          .where('ownerId', isEqualTo: _uid)
+          .where('ownerId', isEqualTo: owner)
           .where('eventId', isEqualTo: eventDoc.id)),
     ));
     for (final orderDocs in ordersDocsList) {
@@ -120,7 +129,7 @@ class WalletService {
     final voteOrderDocs = await _safeDocs(
         _db
             .collection('voteOrders')
-            .where('ownerId', isEqualTo: _uid)
+            .where('ownerId', isEqualTo: owner)
             .where('organisationId', isEqualTo: organisationId));
     for (final doc in voteOrderDocs) {
       final order = VoteOrder.fromMap(doc.id, doc.data());
@@ -131,7 +140,7 @@ class WalletService {
 
     final withdrawalDocs =
         await _safeDocs(_withdrawals
-            .where('ownerId', isEqualTo: _uid)
+            .where('ownerId', isEqualTo: owner)
             .where('organisationId', isEqualTo: organisationId));
     num withdrawn = 0;
     num pending = 0;
@@ -139,7 +148,7 @@ class WalletService {
       final w = Withdrawal.fromMap(doc.id, doc.data());
       if (w.status == WithdrawalStatus.paid) {
         withdrawn += w.amount;
-      } else if (w.status == WithdrawalStatus.pending) {
+      } else if (w.isOpen) {
         pending += w.amount;
       }
     }
@@ -223,40 +232,76 @@ class WalletService {
         .handleError((_) => <Withdrawal>[]);
   }
 
+  /// Envoie une demande de retrait à l'administrateur. Conditions :
+  /// organisation certifiée et non bloquée, aucune autre demande en cours
+  /// (une seule à la fois, traitée dans l'ordre), solde suffisant.
+  /// Chaque demande reçoit un numéro séquentiel global (`counters/
+  /// withdrawals`) attribué dans une transaction.
   Future<void> requestWithdrawal({
-    required String organisationId,
-    required String organisationName,
+    required Organisation organisation,
     required num amount,
     required PaymentMethod paymentMethod,
     required String phone,
   }) async {
     final uid = _uid;
     if (uid == null) throw StateError('Utilisateur non connecté.');
-    if (amount <= 0) throw StateError('Le montant doit être supérieur à 0.');
-    if (phone.trim().isEmpty) {
-      throw StateError('Le numéro Mobile Money est requis.');
+    if (organisation.blocked) {
+      throw StateError("Cette organisation est bloquée par l'administrateur.");
+    }
+    if (!organisation.certified) {
+      throw StateError("L'organisation doit être certifiée par l'administrateur avant de retirer.");
+    }
+    if (amount < kMinWithdrawalAmount) {
+      throw StateError('Le retrait minimum est de $kMinWithdrawalAmount XAF.');
+    }
+    if (phone.trim().length < 8) {
+      throw StateError('Le numéro Mobile Money est invalide.');
     }
 
-    final summary = await fetchSummary(organisationId);
+    final existing = await _safeDocs(_withdrawals
+        .where('ownerId', isEqualTo: uid)
+        .where('organisationId', isEqualTo: organisation.id));
+    final hasOpen = existing.any((d) => Withdrawal.fromMap(d.id, d.data()).isOpen);
+    if (hasOpen) {
+      throw StateError(
+          "Une demande est déjà en cours de traitement. Attendez sa validation avant d'en faire une autre.");
+    }
+
+    final summary = await fetchSummary(organisation.id);
     if (amount > summary.availableBalance) {
       throw StateError('Solde insuffisant pour ce retrait.');
     }
 
+    final counterRef = _db.collection('counters').doc('withdrawals');
     final doc = _withdrawals.doc();
-    final withdrawal = Withdrawal(
-      id: doc.id,
-      organisationId: organisationId,
-      organisationName: organisationName,
-      ownerId: uid,
-      amount: amount,
-      paymentMethod: paymentMethod,
-      phone: phone.trim(),
-    );
-    await doc.set(withdrawal.toMap()).timeout(_timeout);
+    await _db.runTransaction((tx) async {
+      final counter = await tx.get(counterRef);
+      final number = counter.exists ? ((counter.data()!['next'] as num?)?.toInt() ?? 1) : 1;
+      final withdrawal = Withdrawal(
+        id: doc.id,
+        number: number,
+        organisationId: organisation.id,
+        organisationName: organisation.name,
+        ownerId: uid,
+        amount: amount,
+        paymentMethod: paymentMethod,
+        phone: phone.trim(),
+      );
+      tx.set(doc, withdrawal.toMap());
+      if (counter.exists) {
+        tx.update(counterRef, {'next': number + 1});
+      } else {
+        tx.set(counterRef, {'next': number + 1});
+      }
+    }).timeout(_timeout);
   }
 
-  /// Annule une demande encore en attente (aucun traitement en cours).
+  /// Annule une demande encore en attente. Elle reste dans l'historique
+  /// (statut "Annulé") pour garder une trace complète et ordonnée.
   Future<void> cancelWithdrawal(String withdrawalId) {
-    return _withdrawals.doc(withdrawalId).delete().timeout(_timeout);
+    return _withdrawals.doc(withdrawalId).update({
+      'status': 'cancelled',
+      'cancelledAt': FieldValue.serverTimestamp(),
+    }).timeout(_timeout);
   }
 }

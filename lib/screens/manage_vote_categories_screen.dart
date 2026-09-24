@@ -59,13 +59,13 @@ class ManageVoteCategoriesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Catégories', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text('Catégories', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(context),
         backgroundColor: authPrimary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Ajouter', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white)),
+        label: Text('Ajouter', style: GoogleFonts.nunito(fontWeight: FontWeight.w600, color: Colors.white)),
       ),
       body: SafeArea(
         child: StreamBuilder<List<VoteCategory>>(
@@ -80,7 +80,7 @@ class ManageVoteCategoriesScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(32),
                   child: Text('Aucune catégorie. Ajoutez-en une avec le bouton ci-dessous.',
-                      textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                      textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                 ),
               );
             }
@@ -145,17 +145,17 @@ class _CategoryTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(category.title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                    Text(category.title, style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                     const SizedBox(height: 3),
                     Text('${fmt.format(category.pricePerVote)} XAF / vote',
-                        style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                        style: GoogleFonts.nunito(fontSize: 12, color: authMuted)),
                     const SizedBox(height: 4),
                     StreamBuilder<List<VoteCandidate>>(
                       stream: VoteService.instance.watchCandidates(campaign.id, category.id),
                       builder: (context, snap) {
                         final count = snap.data?.length ?? 0;
                         return Text('$count candidat${count > 1 ? 's' : ''}',
-                            style: GoogleFonts.poppins(fontSize: 11.5, color: authPrimary, fontWeight: FontWeight.w600));
+                            style: GoogleFonts.nunito(fontSize: 11.5, color: authPrimary, fontWeight: FontWeight.w600));
                       },
                     ),
                   ],
@@ -234,7 +234,7 @@ class _CategoryFormState extends State<_CategoryForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Nouvelle catégorie', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Nouvelle catégorie', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: _pickImage,
@@ -275,7 +275,7 @@ class _CategoryFormState extends State<_CategoryForm> {
               ),
               child: _saving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
-                  : Text('Ajouter la catégorie', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  : Text('Ajouter la catégorie', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
             ),
           ),
         ],

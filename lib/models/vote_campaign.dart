@@ -49,6 +49,10 @@ class VoteCampaign {
   final VoteCampaignStatus status;
   final DateTime? createdAt;
 
+  /// Voir [Event.organisationCertified] / [Event.hiddenByAdmin].
+  final bool organisationCertified;
+  final bool hiddenByAdmin;
+
   const VoteCampaign({
     required this.id,
     required this.organisationId,
@@ -61,6 +65,8 @@ class VoteCampaign {
     this.endsAt,
     this.status = VoteCampaignStatus.draft,
     this.createdAt,
+    this.organisationCertified = false,
+    this.hiddenByAdmin = false,
   });
 
   bool get isOpenForVoting {
@@ -87,6 +93,8 @@ class VoteCampaign {
       endsAt: rawEndsAt is Timestamp ? rawEndsAt.toDate() : null,
       status: _statusFromString(map['status'] as String?),
       createdAt: rawCreatedAt is Timestamp ? rawCreatedAt.toDate() : null,
+      organisationCertified: map['organisationCertified'] as bool? ?? false,
+      hiddenByAdmin: map['hiddenByAdmin'] as bool? ?? false,
     );
   }
 
@@ -102,6 +110,8 @@ class VoteCampaign {
       'endsAt': endsAt == null ? null : Timestamp.fromDate(endsAt!),
       'status': _statusToString(status),
       'createdAt': FieldValue.serverTimestamp(),
+      'organisationCertified': organisationCertified,
+      'hiddenByAdmin': hiddenByAdmin,
     };
   }
 }

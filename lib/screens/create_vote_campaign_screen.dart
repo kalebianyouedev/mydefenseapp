@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../models/organisation.dart';
+import '../services/ai_service.dart';
 import '../services/vote_service.dart';
+import '../widgets/ai_generate_button.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
 
@@ -67,6 +69,10 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
       showAuthSnack(context, 'Le titre de la campagne est requis.');
       return;
     }
+    if (_coverImage == null) {
+      showAuthSnack(context, 'Ajoutez une image de couverture pour la campagne.');
+      return;
+    }
     if (_startsAt != null && _endsAt != null && _endsAt!.isBefore(_startsAt!)) {
       showAuthSnack(context, 'La clôture doit être après l\'ouverture.');
       return;
@@ -77,7 +83,7 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
         organisation: widget.organisation,
         title: _titleCtrl.text,
         description: _descriptionCtrl.text,
-        coverImageFile: _coverImage,
+        coverImageFile: _coverImage!,
         startsAt: _startsAt,
         endsAt: _endsAt,
       );
@@ -102,7 +108,7 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
         elevation: 0,
         foregroundColor: authInk,
         title: Text('Nouvelle campagne de vote',
-            style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
+            style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
       ),
       body: SafeArea(
         child: ListView(
@@ -111,14 +117,15 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
             GestureDetector(
               onTap: _pickCover,
               child: Container(
-                height: 160,
+                height: 220,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4F4F6),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: authBorder),
+                  // Aperçu entier (non rogné), comme l'affichage public.
                   image: _coverImage != null
-                      ? DecorationImage(image: FileImage(_coverImage!), fit: BoxFit.cover)
+                      ? DecorationImage(image: FileImage(_coverImage!), fit: BoxFit.contain)
                       : null,
                 ),
                 child: _coverImage == null
@@ -128,8 +135,8 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
                           children: [
                             const Icon(Icons.emoji_events_outlined, size: 34, color: authMuted),
                             const SizedBox(height: 8),
-                            Text('Photo de couverture (optionnel)',
-                                style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+                            Text('Image de couverture (obligatoire)',
+                                style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
                           ],
                         ),
                       )
@@ -137,14 +144,14 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
               ),
             ),
             const SizedBox(height: 22),
-            Text('Titre de la campagne', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+            Text('Titre de la campagne', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
             const SizedBox(height: 8),
             TextField(
               controller: _titleCtrl,
-              style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+              style: GoogleFonts.nunito(fontSize: 14, color: authInk),
               decoration: InputDecoration(
                 hintText: 'Ex : Meilleur artiste camerounais 2026',
-                hintStyle: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+                hintStyle: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: authBorder)),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: authBorder)),
@@ -152,16 +159,33 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Description (optionnel)', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+            Row(
+              children: [
+                Expanded(
+                  child: Text('Description (optionnel)',
+                      style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+                ),
+                AiGenerateButton(
+                  controller: _descriptionCtrl,
+                  validate: () => _titleCtrl.text.trim().isEmpty ? "Renseignez d'abord le titre de la campagne." : null,
+                  generate: (instructions) => AiService.instance.generateVoteCampaignDescription(
+                    title: _titleCtrl.text.trim(),
+                    organisationName: widget.organisation.name,
+                    existing: _descriptionCtrl.text,
+                    instructions: instructions,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _descriptionCtrl,
               minLines: 3,
               maxLines: 5,
-              style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+              style: GoogleFonts.nunito(fontSize: 14, color: authInk),
               decoration: InputDecoration(
                 hintText: 'Décrivez le contexte, les règles, les critères...',
-                hintStyle: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+                hintStyle: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: authBorder)),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: authBorder)),
@@ -202,7 +226,7 @@ class _CreateVoteCampaignScreenState extends State<CreateVoteCampaignScreen> {
                 ),
                 child: _saving
                     ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                    : Text('Créer la campagne', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
+                    : Text('Créer la campagne', style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -233,13 +257,13 @@ class _DateField extends StatelessWidget {
               children: [
                 const Icon(Icons.calendar_today_outlined, size: 14, color: authMuted),
                 const SizedBox(width: 6),
-                Text(label, style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted)),
+                Text(label, style: GoogleFonts.nunito(fontSize: 11.5, color: authMuted)),
               ],
             ),
             const SizedBox(height: 6),
             Text(
               value ?? 'Choisir',
-              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: value == null ? authMuted : authInk),
+              style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: value == null ? authMuted : authInk),
             ),
           ],
         ),

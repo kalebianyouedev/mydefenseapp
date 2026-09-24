@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'home_screen.dart';
 import 'services/auth_service.dart';
+import 'session_gate.dart';
 import 'welcome_screen.dart';
 
 class AppColors {
@@ -46,11 +46,12 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       final isSignedIn = AuthService.instance.currentUser != null;
+      if (isSignedIn) {
+        enterApp(context);
+        return;
+      }
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) =>
-              isSignedIn ? const HomeScreen() : const WelcomeScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
       );
     });
   }

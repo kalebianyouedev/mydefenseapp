@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import 'home_screen.dart';
 import 'login_screen.dart';
 import 'services/auth_service.dart';
+import 'session_gate.dart';
 import 'widgets/auth_widgets.dart';
 
 /// Signup page (distinct from the Login page).
@@ -40,12 +40,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void _goToHome() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
-  }
+  // Vérifie aussi que le compte n'a pas été bloqué par l'administrateur.
+  void _goToHome() => enterApp(context);
 
   Future<void> _submitSignup() async {
     final name = _nameController.text.trim();
@@ -131,7 +127,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Text(
                       'Sign Up',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                         color: authInk,
@@ -141,7 +137,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Text(
                       'Create your account to book your tickets and experience every event',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 13.5,
                         color: authMuted,
                         height: 1.4,
@@ -199,7 +195,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       'Or sign up with',
                       textAlign: TextAlign.center,
                       style:
-                          GoogleFonts.poppins(fontSize: 13, color: authMuted),
+                          GoogleFonts.nunito(fontSize: 13, color: authMuted),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -227,7 +223,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         Text(
                           'Already have an account?',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                             fontSize: 13,
                             color: authMuted,
                           ),
@@ -241,7 +237,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           child: Text(
                             'Log in',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: authPrimary,

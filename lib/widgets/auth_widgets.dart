@@ -4,10 +4,17 @@ import 'package:google_fonts/google_fonts.dart';
 /// Components shared between the Login screen and the Signup screen
 /// so both pages stay visually identical.
 /// Deliberately flat style: no shadow, no gradient.
-const authPrimary = Color(0xFFE30B4C);
-const authInk = Color(0xFF1A1A1E);
-const authMuted = Color(0xFF6B6B72);
-const authBorder = Color(0xFFE3E3E8);
+// Palette Ça Bouge Où ? : bleu nuit de la marque (actions, sélection),
+// rouge pour les boutons de réservation, vert pour les prix, ambre pour
+// les boosts.
+const authPrimary = Color(0xFF1E3A8A);
+const authAccent = Color(0xFFDC2626);
+const authSuccess = Color(0xFF16A34A);
+const authBoost = Color(0xFFF5B335);
+const authPrimarySoft = Color(0xFFEAF0FB);
+const authInk = Color(0xFF0F172A);
+const authMuted = Color(0xFF64748B);
+const authBorder = Color(0xFFE2E8F0);
 
 void showAuthSnack(BuildContext context, String message) {
   ScaffoldMessenger.of(context)
@@ -39,7 +46,7 @@ class AuthTopBar extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 'EN',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: authInk,
@@ -58,7 +65,7 @@ class AuthTopBar extends StatelessWidget {
             children: [
               Text(
                 'Continue',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: authInk,
@@ -85,7 +92,7 @@ class AuthLogo extends StatelessWidget {
         height: 64,
         errorBuilder: (context, error, stackTrace) => Text(
           'Where the party is',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.nunito(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: authPrimary,
@@ -171,7 +178,7 @@ class _Tab extends StatelessWidget {
             const SizedBox(width: 7),
             Text(
               label,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
                 color: active ? Colors.white : authMuted,
@@ -209,11 +216,11 @@ class AuthTextField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: GoogleFonts.poppins(fontSize: 14, color: authInk),
+      style: GoogleFonts.nunito(fontSize: 14, color: authInk),
       cursorColor: authPrimary,
       decoration: InputDecoration(
         hintText: label,
-        hintStyle: GoogleFonts.poppins(fontSize: 14, color: authMuted),
+        hintStyle: GoogleFonts.nunito(fontSize: 14, color: authMuted),
         prefixIcon: Icon(icon, size: 20, color: authMuted),
         suffixIcon: onToggleObscure == null
             ? null
@@ -279,7 +286,7 @@ class AuthPrimaryButton extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               label,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -322,7 +329,7 @@ class AuthSocialButton extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: authInk,
@@ -346,7 +353,7 @@ class AuthOrDivider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             'or',
-            style: GoogleFonts.poppins(fontSize: 13, color: authMuted),
+            style: GoogleFonts.nunito(fontSize: 13, color: authMuted),
           ),
         ),
         const Expanded(child: Divider(color: authBorder, thickness: 1)),
@@ -357,7 +364,7 @@ class AuthOrDivider extends StatelessWidget {
 
 Widget googleGlyph() => Text(
       'G',
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.nunito(
         fontSize: 18,
         fontWeight: FontWeight.w800,
         color: const Color(0xFF4285F4),

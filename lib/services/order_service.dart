@@ -197,9 +197,21 @@ class OrderService {
         .where('buyerId', isEqualTo: uid)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => TicketOrder.fromMap(d.id, d.data())).toList())
+        .map((snap) => snap.docs
+            .map((d) => TicketOrder.fromMap(d.id, d.data()))
+            .where((o) => !o.hiddenByBuyer)
+            .toList())
         .handleError((_) => <TicketOrder>[]);
+  }
+
+  /// Retire des commandes de "Mes commandes" (masquage côté acheteur).
+  Future<void> hideOrders(List<String> orderIds) async {
+    if (orderIds.isEmpty) return;
+    final batch = _db.batch();
+    for (final id in orderIds) {
+      batch.update(_orders.doc(id), {'hiddenByBuyer': true});
+    }
+    await batch.commit().timeout(_timeout);
   }
 
   Future<TicketOrder?> fetchOrder(String orderId) async {

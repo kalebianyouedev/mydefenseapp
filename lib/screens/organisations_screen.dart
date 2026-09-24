@@ -55,7 +55,7 @@ class OrganisationsScreen extends StatelessWidget {
                       ),
                       Text(
                         'Organisations',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: authInk,
@@ -85,7 +85,7 @@ class OrganisationsScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Vos organisations',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
                         color: authInk,
@@ -94,7 +94,7 @@ class OrganisationsScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       'Gérez vos structures, événements, votes et retraits.',
-                      style: GoogleFonts.poppins(fontSize: 14, color: authMuted),
+                      style: GoogleFonts.nunito(fontSize: 14, color: authMuted),
                     ),
                     const SizedBox(height: 20),
                     SizedBox(
@@ -104,7 +104,7 @@ class OrganisationsScreen extends StatelessWidget {
                         icon: const Icon(Icons.add, color: Colors.white),
                         label: Text(
                           'Nouvelle organisation',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -191,7 +191,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'Aucune organisation',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: authInk,
@@ -201,7 +201,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Commencez par créer votre première organisation.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+              style: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -218,7 +218,7 @@ class _EmptyState extends StatelessWidget {
               ),
               child: Text(
                 'Créer une organisation',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -270,7 +270,7 @@ class _OrganisationCard extends StatelessWidget {
                   children: [
                     Text(
                       organisation.name,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: authInk,
@@ -281,7 +281,7 @@ class _OrganisationCard extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 3),
                         child: Text(
                           'Créée le ${DateFormat.yMMMd('fr_FR').format(organisation.createdAt!)}',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                               fontSize: 12, color: authMuted),
                         ),
                       ),

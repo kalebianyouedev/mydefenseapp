@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/event.dart';
+import '../models/event_category.dart';
 import '../models/organisation.dart';
+import '../models/payment_method.dart';
 import '../models/promo_code.dart';
 import '../models/ticket_type.dart';
 import 'auth_service.dart';
@@ -37,8 +39,10 @@ class EventService {
         .orderBy('createdAt', descending: true)
         .limit(100)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => Event.fromMap(d.id, d.data())).toList())
+        .map((snap) => snap.docs
+            .map((d) => Event.fromMap(d.id, d.data()))
+            .where((e) => !e.hiddenByAdmin)
+            .toList())
         .handleError((_) => <Event>[]);
   }
 
@@ -84,7 +88,10 @@ class EventService {
         .limit(100)
         .get()
         .timeout(_timeout);
-    return snap.docs.map((d) => Event.fromMap(d.id, d.data())).toList();
+    return snap.docs
+        .map((d) => Event.fromMap(d.id, d.data()))
+        .where((e) => !e.hiddenByAdmin)
+        .toList();
   }
 
   Future<Event?> fetchOne(String eventId) async {
@@ -100,6 +107,108 @@ class EventService {
   }
 
   // ---------------------------------------------------------------------
+  // J'aime (favoris)
+  // ---------------------------------------------------------------------
+
+  DocumentReference<Map<String, dynamic>> _likeDoc(String eventId, String uid) =>
+      _events.doc(eventId).collection('likes').doc(uid);
+
+  /// Miroir côté utilisateur, pour lister ses favoris dans "Compte".
+  DocumentReference<Map<String, dynamic>> _likedEventDoc(String uid, String eventId) =>
+      _db.collection('users').doc(uid).collection('likedEvents').doc(eventId);
+
+  Stream<bool> watchLiked(String eventId) {
+    final uid = _uid;
+    if (uid == null) return Stream.value(false);
+    return _likeDoc(eventId, uid)
+        .snapshots()
+        .map((s) => s.exists)
+        .handleError((_) => false);
+  }
+
+  Future<void> toggleLike(Event event) async {
+    final uid = _uid;
+    if (uid == null) throw StateError('Utilisateur non connecté.');
+    final likeRef = _likeDoc(event.id, uid);
+    final mirrorRef = _likedEventDoc(uid, event.id);
+    final eventRef = _events.doc(event.id);
+
+    await _db.runTransaction((tx) async {
+      final likeSnap = await tx.get(likeRef);
+      if (likeSnap.exists) {
+        tx.delete(likeRef);
+        tx.delete(mirrorRef);
+        tx.update(eventRef, {'likeCount': FieldValue.increment(-1)});
+      } else {
+        tx.set(likeRef, {'createdAt': FieldValue.serverTimestamp()});
+        tx.set(mirrorRef, {'createdAt': FieldValue.serverTimestamp()});
+        tx.update(eventRef, {'likeCount': FieldValue.increment(1)});
+      }
+    }).timeout(_timeout);
+  }
+
+  /// Ids des événements aimés par l'utilisateur, du plus récent au plus
+  /// ancien.
+  Stream<List<String>> watchLikedEventIds() {
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
+    return _db
+        .collection('users')
+        .doc(uid)
+        .collection('likedEvents')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => d.id).toList())
+        .handleError((_) => <String>[]);
+  }
+
+  // ---------------------------------------------------------------------
+  // Boost
+  // ---------------------------------------------------------------------
+
+  static const minBoostAmount = 100;
+
+  /// Booste un événement : l'utilisateur envoie [amount] F CFA (100 F
+  /// minimum) par Orange Money / MTN Mobile Money. Aucune passerelle
+  /// réelle n'est branchée : le paiement est simulé comme pour les
+  /// billets et les votes. Le boost est tracé dans `eventBoosts` et
+  /// cumulé sur l'événement (`boosts`, `boostAmount`), ce qui le fait
+  /// remonter dans le fil d'accueil.
+  Future<void> boost({
+    required Event event,
+    required num amount,
+    required PaymentMethod paymentMethod,
+    required String paymentPhone,
+  }) async {
+    final uid = _uid;
+    if (uid == null) throw StateError('Utilisateur non connecté.');
+    if (amount < minBoostAmount) {
+      throw StateError('Le boost minimum est de $minBoostAmount F CFA.');
+    }
+    if (paymentPhone.trim().length < 8) {
+      throw StateError('Numéro de paiement invalide.');
+    }
+    final batch = _db.batch();
+    batch.set(_db.collection('eventBoosts').doc(), {
+      'eventId': event.id,
+      'eventTitle': event.title,
+      'ownerId': event.ownerId,
+      'buyerId': uid,
+      'amount': amount,
+      'currency': 'XAF',
+      'paymentMethod': paymentMethodToString(paymentMethod),
+      'paymentPhone': paymentPhone.trim(),
+      'status': 'confirmed',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    batch.update(_events.doc(event.id), {
+      'boosts': FieldValue.increment(1),
+      'boostAmount': FieldValue.increment(amount),
+    });
+    await batch.commit().timeout(_timeout);
+  }
+
+  // ---------------------------------------------------------------------
   // Création / édition
   // ---------------------------------------------------------------------
 
@@ -111,6 +220,7 @@ class EventService {
     required String description,
     required String venue,
     required String city,
+    required EventCategory category,
     File? coverImageFile,
     String? videoUrl,
     List<File> galleryFiles = const [],
@@ -120,6 +230,9 @@ class EventService {
     String? refundPolicy,
   }) async {
     final uid = _uid;
+    if (organisation.blocked) {
+      throw StateError("Cette organisation est bloquée par l'administrateur.");
+    }
     if (uid == null) throw StateError('Utilisateur non connecté.');
     if (title.trim().isEmpty) {
       throw StateError('Le titre de l\'événement est requis.');
@@ -142,12 +255,14 @@ class EventService {
       id: doc.id,
       organisationId: organisation.id,
       organisationName: organisation.name,
+      organisationCertified: organisation.certified,
       organisationLogoUrl: organisation.logoUrl,
       ownerId: uid,
       title: title.trim(),
       description: description.trim(),
       venue: venue.trim(),
       city: city.trim(),
+      category: category,
       coverImageUrl: coverImageUrl,
       videoUrl: (videoUrl?.trim().isEmpty ?? true) ? null : videoUrl!.trim(),
       gallery: gallery,
@@ -169,6 +284,7 @@ class EventService {
     required String description,
     required String venue,
     required String city,
+    required EventCategory category,
     File? newCoverImageFile,
     String? coverImageUrl,
     String? videoUrl,
@@ -187,6 +303,7 @@ class EventService {
       'description': description.trim(),
       'venue': venue.trim(),
       'city': city.trim(),
+      'category': category.id,
       'coverImageUrl': resolvedCoverUrl,
       'videoUrl': (videoUrl?.trim().isEmpty ?? true) ? null : videoUrl!.trim(),
       'seances': seances.map((s) => s.toMap()).toList(),

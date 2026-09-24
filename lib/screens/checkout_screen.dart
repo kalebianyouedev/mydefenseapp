@@ -97,7 +97,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: authInk,
-        title: Text('Paiement', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
+        title: Text('Paiement', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700, color: authInk)),
       ),
       body: SafeArea(
         child: Column(
@@ -106,14 +106,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 children: [
-                  Text('Récapitulatif', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                  Text('Récapitulatif', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(border: Border.all(color: authBorder), borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       children: [
-                        Text(widget.event.title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
+                        Text(widget.event.title, style: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: authInk)),
                         const SizedBox(height: 10),
                         for (final item in widget.items)
                           Padding(
@@ -122,9 +122,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               children: [
                                 Expanded(
                                   child: Text('${item.quantity} × ${item.ticketTypeName}',
-                                      style: GoogleFonts.poppins(fontSize: 13, color: authInk)),
+                                      style: GoogleFonts.nunito(fontSize: 13, color: authInk)),
                                 ),
-                                Text('${fmt.format(item.subtotal)} XAF', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+                                Text('${fmt.format(item.subtotal)} XAF', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
                               ],
                             ),
                           ),
@@ -134,22 +134,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             padding: const EdgeInsets.only(bottom: 6),
                             child: Row(
                               children: [
-                                Expanded(child: Text('Réduction (${_appliedPromo!.code})', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1E9E6B)))),
-                                Text('-${fmt.format(_discount)} XAF', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1E9E6B))),
+                                Expanded(child: Text('Réduction (${_appliedPromo!.code})', style: GoogleFonts.nunito(fontSize: 13, color: const Color(0xFF1E9E6B)))),
+                                Text('-${fmt.format(_discount)} XAF', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1E9E6B))),
                               ],
                             ),
                           ),
                         Row(
                           children: [
-                            Expanded(child: Text('Total', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk))),
-                            Text('${fmt.format(_total)} XAF', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: authPrimary)),
+                            Expanded(child: Text('Total', style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: authInk))),
+                            Text('${fmt.format(_total)} XAF', style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w800, color: authPrimary)),
                           ],
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text('Code promo', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                  Text('Code promo', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -174,13 +174,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: OutlinedButton.styleFrom(side: const BorderSide(color: authBorder), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13))),
                           child: _checkingPromo
                               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                              : Text('Appliquer', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+                              : Text('Appliquer', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text('Moyen de paiement', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                  Text('Moyen de paiement', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -200,15 +200,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text('Numéro ${paymentMethodLabel(_method)}', style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
+                  Text('Numéro ${paymentMethodLabel(_method)}', style: GoogleFonts.nunito(fontSize: 13.5, fontWeight: FontWeight.w700, color: authInk)),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _phoneCtrl,
                     keyboardType: TextInputType.phone,
-                    style: GoogleFonts.poppins(fontSize: 14),
+                    style: GoogleFonts.nunito(fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'Ex. 6XX XX XX XX',
-                      hintStyle: GoogleFonts.poppins(fontSize: 13.5, color: authMuted),
+                      hintStyle: GoogleFonts.nunito(fontSize: 13.5, color: authMuted),
                       prefixIcon: const Icon(Icons.phone_outlined, size: 20, color: authMuted),
                       contentPadding: const EdgeInsets.symmetric(vertical: 14),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: const BorderSide(color: authBorder)),
@@ -235,7 +235,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   child: _submitting
                       ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                      : Text('Payer ${fmt.format(_total)} XAF', style: GoogleFonts.poppins(fontSize: 15.5, fontWeight: FontWeight.w600)),
+                      : Text('Payer ${fmt.format(_total)} XAF', style: GoogleFonts.nunito(fontSize: 15.5, fontWeight: FontWeight.w600)),
                 ),
               ),
             ),
@@ -274,7 +274,7 @@ class _PaymentMethodCard extends StatelessWidget {
               child: const Icon(Icons.phone_iphone, size: 17, color: Colors.white),
             ),
             const SizedBox(height: 8),
-            Text(label, style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w700, color: authInk)),
+            Text(label, style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w700, color: authInk)),
           ],
         ),
       ),

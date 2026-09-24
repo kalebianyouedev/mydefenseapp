@@ -10,6 +10,8 @@ import '../models/vote_category.dart';
 import '../services/vote_service.dart';
 import '../widgets/auth_widgets.dart'
     show authPrimary, authInk, authMuted, authBorder, showAuthSnack;
+import '../widgets/event_actions.dart' show FollowOrganisationButton;
+import '../widgets/event_cover.dart';
 import 'vote_order_confirmation_screen.dart';
 
 /// Palette catégorielle validée (voir la skill dataviz) : ordre fixe,
@@ -77,13 +79,28 @@ class PublicVoteCampaignScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(campaign.organisationName.toUpperCase(),
-                        style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: authPrimary, letterSpacing: 0.6)),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(campaign.organisationName.toUpperCase(),
+                              style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: authPrimary, letterSpacing: 0.6)),
+                        ),
+                        if (campaign.organisationCertified) ...[
+                          const SizedBox(width: 4),
+                          const Icon(Icons.verified, size: 15, color: Color(0xFF2D6BE0)),
+                        ],
+                        const Spacer(),
+                        FollowOrganisationButton(
+                          organisationId: campaign.organisationId,
+                          organisationName: campaign.organisationName,
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 4),
-                    Text(campaign.title, style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
+                    Text(campaign.title, style: GoogleFonts.nunito(fontSize: 22, fontWeight: FontWeight.w700, color: authInk)),
                     if (campaign.description.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      Text(campaign.description, style: GoogleFonts.poppins(fontSize: 13.5, color: authInk, height: 1.5)),
+                      Text(campaign.description, style: GoogleFonts.nunito(fontSize: 13.5, color: authInk, height: 1.5)),
                     ],
                     if (!campaign.isOpenForVoting) ...[
                       const SizedBox(height: 16),
@@ -96,7 +113,7 @@ class PublicVoteCampaignScreen extends StatelessWidget {
                         final categories = snapshot.data ?? const <VoteCategory>[];
                         if (categories.isEmpty) {
                           return Text('Aucune catégorie pour le moment.',
-                              style: GoogleFonts.poppins(fontSize: 13, color: authMuted));
+                              style: GoogleFonts.nunito(fontSize: 13, color: authMuted));
                         }
                         return Column(
                           children: categories
@@ -129,18 +146,15 @@ class _Cover extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          height: 220,
+        // Affiche entière sur fond flou : rien n'est rogné.
+        SizedBox(
+          height: 340,
           width: double.infinity,
-          decoration: BoxDecoration(
-            color: authInk,
-            image: campaign.coverImageUrl != null
-                ? DecorationImage(image: NetworkImage(campaign.coverImageUrl!), fit: BoxFit.cover)
-                : null,
+          child: EventCover(
+            imageUrl: campaign.coverImageUrl,
+            fallbackIcon: Icons.emoji_events_outlined,
+            fallbackIconSize: 48,
           ),
-          child: campaign.coverImageUrl == null
-              ? const Center(child: Icon(Icons.emoji_events_outlined, size: 48, color: Colors.white70))
-              : null,
         ),
         Positioned(
           top: 8,
@@ -178,7 +192,7 @@ class _StatusBanner extends StatelessWidget {
         children: [
           const Icon(Icons.info_outline, size: 18, color: authMuted),
           const SizedBox(width: 10),
-          Expanded(child: Text(message, style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted))),
+          Expanded(child: Text(message, style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted))),
         ],
       ),
     );
@@ -221,10 +235,10 @@ class _CategorySection extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(category.title, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
+                child: Text(category.title, style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
               ),
               Text('${fmt.format(category.pricePerVote)} XAF / vote',
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: authMuted)),
+                  style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w600, color: authMuted)),
             ],
           ),
           const SizedBox(height: 12),
@@ -233,7 +247,7 @@ class _CategorySection extends StatelessWidget {
             builder: (context, snapshot) {
               final candidates = snapshot.data ?? const <VoteCandidate>[];
               if (candidates.isEmpty) {
-                return Text('Aucun candidat pour le moment.', style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted));
+                return Text('Aucun candidat pour le moment.', style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted));
               }
               final totalVotes = candidates.fold<int>(0, (sum, c) => sum + c.voteCount);
               final colors = _stableCandidateColors(candidates);
@@ -282,7 +296,7 @@ class _CategoryStats extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(18)),
         child: Text('Aucun vote pour le moment dans cette catégorie.',
-            style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
+            style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted)),
       );
     }
 
@@ -292,7 +306,7 @@ class _CategoryStats extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Répartition des votes', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Répartition des votes', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 14),
           SizedBox(
             height: 140,
@@ -308,14 +322,14 @@ class _CategoryStats extends StatelessWidget {
                     radius: 36,
                     showTitle: pct >= 8,
                     title: '${pct.toStringAsFixed(0)}%',
-                    titleStyle: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                    titleStyle: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
                   );
                 }).toList(),
               ),
             ),
           ),
           const SizedBox(height: 16),
-          Text('Classement', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Classement', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 10),
           ...candidates.asMap().entries.map((entry) {
             final rank = entry.key + 1;
@@ -331,10 +345,10 @@ class _CategoryStats extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(candidate.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+                        style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
                   ),
                   Text('${candidate.voteCount} · ${pct.toStringAsFixed(0)}%',
-                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: authMuted)),
+                      style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: authMuted)),
                 ],
               ),
             );
@@ -365,7 +379,7 @@ class _RankBadge extends StatelessWidget {
       decoration: BoxDecoration(color: color.withOpacity(rank <= 3 ? 1 : 0.12), shape: BoxShape.circle),
       child: Center(
         child: Text('$rank',
-            style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: rank <= 3 ? Colors.white : authMuted)),
+            style: GoogleFonts.nunito(fontSize: 11, fontWeight: FontWeight.w700, color: rank <= 3 ? Colors.white : authMuted)),
       ),
     );
   }
@@ -402,76 +416,67 @@ class _CandidateCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Grande photo (entière, non rognée), puis nom et bio en dessous.
           GestureDetector(
             onTap: onTapProfile,
             behavior: HitTestBehavior.opaque,
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: SizedBox(
-                        width: 92,
-                        height: 110,
-                        child: candidate.photoUrl != null
-                            ? Image.network(
-                                candidate.photoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const ColoredBox(
-                                  color: Color(0xFFF4F4F6),
-                                  child: Icon(Icons.person_outline, color: authMuted, size: 34),
-                                ),
-                              )
-                            : const ColoredBox(
-                                color: Color(0xFFF4F4F6),
-                                child: Icon(Icons.person_outline, color: authMuted, size: 34),
-                              ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: -6,
-                      right: -6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(color: authInk, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white, width: 1.5)),
-                        child: Text('N°${candidate.number}', style: GoogleFonts.poppins(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.white)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(candidate.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: authInk)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SizedBox(
+                    height: 380,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        EventCover(
+                          imageUrl: candidate.photoUrl,
+                          fallbackIcon: Icons.person_outline,
+                          fallbackIconSize: 56,
+                        ),
+                        Positioned(
+                          left: 10,
+                          top: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: authInk.withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                            ),
+                            child: Text('N°${candidate.number}',
+                                style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
                           ),
-                          if (isLeader) ...[
-                            const SizedBox(width: 6),
-                            const Icon(Icons.emoji_events, size: 15, color: Color(0xFFC9971A)),
-                          ],
-                        ],
-                      ),
-                      if (candidate.description.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(candidate.description, maxLines: 1, overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(fontSize: 12, color: authMuted)),
+                        ),
+                        if (isLeader)
+                          Positioned(
+                            right: 10,
+                            top: 10,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(color: Color(0xFFC9971A), shape: BoxShape.circle),
+                              child: const Icon(Icons.emoji_events, size: 18, color: Colors.white),
+                            ),
+                          ),
                       ],
-                      if (candidate.bio.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(candidate.bio, maxLines: 2, overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(fontSize: 11.5, color: authMuted, height: 1.3)),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
+                const SizedBox(height: 12),
+                Text(candidate.name,
+                    style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w700, color: authInk)),
+                if (candidate.description.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(candidate.description,
+                      style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w500, color: authMuted)),
+                ],
+                if (candidate.bio.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(candidate.bio, maxLines: 4, overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.nunito(fontSize: 12.5, color: authInk, height: 1.45)),
+                ],
               ],
             ),
           ),
@@ -491,12 +496,12 @@ class _CandidateCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text('${percentage.toStringAsFixed(0)}%',
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: authInk)),
+                  style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: authInk)),
             ],
           ),
           const SizedBox(height: 4),
           Text('${candidate.voteCount} vote${candidate.voteCount > 1 ? 's' : ''}',
-              style: GoogleFonts.poppins(fontSize: 11, color: authMuted)),
+              style: GoogleFonts.nunito(fontSize: 11, color: authMuted)),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -509,7 +514,7 @@ class _CandidateCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 11),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Voter pour ${candidate.name}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600)),
+              child: Text('Voter pour ${candidate.name}', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -541,28 +546,35 @@ class _CandidateDetailSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: const Color(0xFFF4F4F6),
-            backgroundImage: candidate.photoUrl != null ? NetworkImage(candidate.photoUrl!) : null,
-            child: candidate.photoUrl == null ? const Icon(Icons.person_outline, color: authMuted, size: 40) : null,
+          // Photo entière (non rognée) du candidat.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              width: 200,
+              height: 250,
+              child: EventCover(
+                imageUrl: candidate.photoUrl,
+                fallbackIcon: Icons.person_outline,
+                fallbackIconSize: 40,
+              ),
+            ),
           ),
           const SizedBox(height: 14),
-          Text('Candidat N°${candidate.number}', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: authPrimary)),
+          Text('Candidat N°${candidate.number}', style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: authPrimary)),
           const SizedBox(height: 4),
-          Text(candidate.name, style: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.w700, color: authInk)),
+          Text(candidate.name, style: GoogleFonts.nunito(fontSize: 19, fontWeight: FontWeight.w700, color: authInk)),
           if (candidate.description.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(candidate.description, style: GoogleFonts.poppins(fontSize: 13, color: authMuted)),
+            Text(candidate.description, style: GoogleFonts.nunito(fontSize: 13, color: authMuted)),
           ],
           const SizedBox(height: 14),
           Text('${candidate.voteCount} vote${candidate.voteCount > 1 ? 's' : ''} · ${percentage.toStringAsFixed(0)}% des votes',
-              style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600, color: authInk)),
+              style: GoogleFonts.nunito(fontSize: 12.5, fontWeight: FontWeight.w600, color: authInk)),
           if (candidate.bio.isNotEmpty) ...[
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(candidate.bio, style: GoogleFonts.poppins(fontSize: 13.5, color: authInk, height: 1.5)),
+              child: Text(candidate.bio, style: GoogleFonts.nunito(fontSize: 13.5, color: authInk, height: 1.5)),
             ),
           ],
           const SizedBox(height: 22),
@@ -577,7 +589,7 @@ class _CandidateDetailSheet extends StatelessWidget {
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
-              child: Text('Voter pour ${candidate.name}', style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w600)),
+              child: Text('Voter pour ${candidate.name}', style: GoogleFonts.nunito(fontSize: 14.5, fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -643,25 +655,25 @@ class _VoteSheetState extends State<_VoteSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Voter pour ${widget.candidate.name}', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
+          Text('Voter pour ${widget.candidate.name}', style: GoogleFonts.nunito(fontSize: 17, fontWeight: FontWeight.w700, color: authInk)),
           const SizedBox(height: 4),
-          Text('${fmt.format(widget.category.pricePerVote)} XAF par vote', style: GoogleFonts.poppins(fontSize: 12.5, color: authMuted)),
+          Text('${fmt.format(widget.category.pricePerVote)} XAF par vote', style: GoogleFonts.nunito(fontSize: 12.5, color: authMuted)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Nombre de votes', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+              Text('Nombre de votes', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
               Row(
                 children: [
                   _stepperButton(Icons.remove, _quantity > 1 ? () => setState(() => _quantity--) : null),
-                  SizedBox(width: 36, child: Text('$_quantity', textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700))),
+                  SizedBox(width: 36, child: Text('$_quantity', textAlign: TextAlign.center, style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700))),
                   _stepperButton(Icons.add, () => setState(() => _quantity++)),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 18),
-          Text('Moyen de paiement', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+          Text('Moyen de paiement', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -685,12 +697,12 @@ class _VoteSheetState extends State<_VoteSheet> {
             ],
           ),
           const SizedBox(height: 18),
-          Text('Numéro ${paymentMethodLabel(_method)}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
+          Text('Numéro ${paymentMethodLabel(_method)}', style: GoogleFonts.nunito(fontSize: 13, fontWeight: FontWeight.w600, color: authInk)),
           const SizedBox(height: 8),
           TextField(
             controller: _phoneCtrl,
             keyboardType: TextInputType.phone,
-            style: GoogleFonts.poppins(fontSize: 14),
+            style: GoogleFonts.nunito(fontSize: 14),
             decoration: InputDecoration(
               hintText: 'Ex. 6XX XX XX XX',
               prefixIcon: const Icon(Icons.phone_outlined, size: 20, color: authMuted),
@@ -714,7 +726,7 @@ class _VoteSheetState extends State<_VoteSheet> {
               ),
               child: _submitting
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                  : Text('Payer ${fmt.format(total)} XAF', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
+                  : Text('Payer ${fmt.format(total)} XAF', style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -766,7 +778,7 @@ class _MethodChip extends StatelessWidget {
               child: const Icon(Icons.phone_iphone, size: 15, color: Colors.white),
             ),
             const SizedBox(height: 6),
-            Text(label, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: authInk)),
+            Text(label, style: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: authInk)),
           ],
         ),
       ),
